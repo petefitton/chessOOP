@@ -1,10 +1,8 @@
 // NOTES FOR WHAT I WAS JUST WORKING ON:
 
-// need to create id's for each square
+// square id's are 0 through 63
 // each chesspiece image tag also needs an id
-// these id's are separate things
-// places to update code are gameState object methods and instantiation of piece objects
-// plus Gameboard object for square id's
+  // pawn OBJECT & IMG tag id's are 109-124 (9-24 with 1 at beginning)
 
 
 
@@ -50,7 +48,7 @@ let gameboard = new Gameboard();
 
 
 
-
+let piecesArray = [];
 
 
 // A pawn will need the following:
@@ -78,204 +76,227 @@ function Pawn(color, location, pieceId) {
   this.id = pieceId;
   this.moves = [/* info about one square forward or if firstMove can move two */];
   this.attack = [/* info about side-ways attack */];
+  this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_pdt60.png";
-    this.image = document.createElement('img');
-    this.image.src = this.img_src;
-    this.image.classList.add('blackPiece')
-    this.image.id = pieceId
+    this.image.classList.add('blackPiece');
   } else {
     this.img_src = "./assets/Chess_plt60.png";
-    this.image = document.createElement('img');
-    this.image.src = this.img_src;
-    this.image.classList.add('whitePiece')
-    this.image.id = pieceId
+    this.image.classList.add('whitePiece');
   }
+  this.image.src = this.img_src;
+  this.image.id = pieceId;
   this.render = function(imgNode, location) {
     document.getElementById(location).appendChild(imgNode);
-  }(this.image, this.location)
+  }
+  this.render(this.image, this.location);
 }
 
 Pawn.prototype = Object.create(Piece.prototype);
 Pawn.prototype.constructor = Pawn;
 
-let blackPawnOne = new Pawn("black", 8, 1);
-let blackPawnTwo = new Pawn("black", 9, 2);
-let blackPawnThree = new Pawn("black", 10, 3);
-let blackPawnFour = new Pawn("black", 11, 4);
-let blackPawnFive = new Pawn("black", 12, 5);
-let blackPawnSix = new Pawn("black", 13, 6);
-let blackPawnSeven = new Pawn("black", 14, 7);
-let blackPawnEight = new Pawn("black", 15, 8);
+let blackPawnOne = new Pawn("black", 8, 109);
+let blackPawnTwo = new Pawn("black", 9, 110);
+let blackPawnThree = new Pawn("black", 10, 111);
+let blackPawnFour = new Pawn("black", 11, 112);
+let blackPawnFive = new Pawn("black", 12, 113);
+let blackPawnSix = new Pawn("black", 13, 114);
+let blackPawnSeven = new Pawn("black", 14, 115);
+let blackPawnEight = new Pawn("black", 15, 116);
 
-let whitePawnOne = new Pawn("white", 48, 17);
-let whitePawnTwo = new Pawn("white", 49, 18);
-let whitePawnThree = new Pawn("white", 50, 19);
-let whitePawnFour = new Pawn("white", 51, 20);
-let whitePawnFive = new Pawn("white", 52, 21);
-let whitePawnSix = new Pawn("white", 53, 22);
-let whitePawnSeven = new Pawn("white", 54, 23);
-let whitePawnEight = new Pawn("white", 55, 24);
-
-
+let whitePawnOne = new Pawn("white", 48, 117);
+let whitePawnTwo = new Pawn("white", 49, 118);
+let whitePawnThree = new Pawn("white", 50, 119);
+let whitePawnFour = new Pawn("white", 51, 120);
+let whitePawnFive = new Pawn("white", 52, 121);
+let whitePawnSix = new Pawn("white", 53, 122);
+let whitePawnSeven = new Pawn("white", 54, 123);
+let whitePawnEight = new Pawn("white", 55, 124);
 
 
-function Rook(color, location) {
+
+
+function Rook(color, location, pieceId) {
   Piece.call(this);
   this.color = color;
   this.location = location;
+  this.id = pieceId;
   // movement changes boolean value
   this.hasMoved = false;
   this.moves = [/* info about up/down & left/right */];
   this.attack = [/* capture is same as movement */];
+  this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_rdt60.png";
+    this.image.classList.add('blackPiece');
   } else {
     this.img_src = "./assets/Chess_rlt60.png";
+    this.image.classList.add('whitePiece');
   }
-  this.image = document.createElement('img');
   this.image.src = this.img_src;
+  this.image.id = pieceId;
   this.render = function(imgNode, location) {
     document.getElementById(location).appendChild(imgNode);
-  }(this.image, this.location)
+  }
+  this.render(this.image, this.location)
 }
 
 Rook.prototype = Object.create(Piece.prototype);
 Rook.prototype.constructor = Rook;
 
-let blackRookOne = new Rook("black", 0);
-let blackRookTwo = new Rook("black", 7);
+let blackRookOne = new Rook("black", 0, 101);
+let blackRookTwo = new Rook("black", 7, 108);
 
-let whiteRookOne = new Rook("white", 56);
-let whiteRookTwo = new Rook("white", 63);
-
-
+let whiteRookOne = new Rook("white", 56, 125);
+let whiteRookTwo = new Rook("white", 63, 132);
 
 
-function Knight(color, location) {
+
+
+function Knight(color, location, pieceId) {
   Piece.call(this);
   this.color = color;
   this.location = location;
+  this.id = pieceId;
   this.moves = [/* info about 2x1 movement (staying on board) */];
   this.attack = [/* capture is same as movement */];
+  this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_ndt60.png";
+    this.image.classList.add('blackPiece');
   } else {
     this.img_src = "./assets/Chess_nlt60.png";
+    this.image.classList.add('whitePiece');
   }
-  this.image = document.createElement('img');
   this.image.src = this.img_src;
+  this.image.id = pieceId;
   this.render = function(imgNode, location) {
     document.getElementById(location).appendChild(imgNode);
-  }(this.image, this.location)
+  }
+  this.render(this.image, this.location)
 }
 
 Knight.prototype = Object.create(Piece.prototype);
 Knight.prototype.constructor = Knight;
 
-let blackKnightOne = new Knight("black", 1);
-let blackKnightTwo = new Knight("black", 6);
+let blackKnightOne = new Knight("black", 1, 102);
+let blackKnightTwo = new Knight("black", 6, 107);
 
-let whiteKnightOne = new Knight("white", 57);
-let whiteKnightTwo = new Knight("white", 62);
-
-
+let whiteKnightOne = new Knight("white", 57, 126);
+let whiteKnightTwo = new Knight("white", 62, 131);
 
 
 
-function Bishop(color, location) {
+
+
+function Bishop(color, location, pieceId) {
   Piece.call(this);
   this.color = color;
   this.location = location;
+  this.id = pieceId;
   this.moves = [/* info about diagonals */];
   this.attack = [/* capture is same as movement */];
+  this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_bdt60.png";
+    this.image.classList.add('blackPiece');
   } else {
     this.img_src = "./assets/Chess_blt60.png";
+    this.image.classList.add('whitePiece');
   }
-  this.image = document.createElement('img');
   this.image.src = this.img_src;
+  this.image.id = pieceId;
   this.render = function(imgNode, location) {
     document.getElementById(location).appendChild(imgNode);
-  }(this.image, this.location)
+  }
+  this.render(this.image, this.location)
 }
 
 Bishop.prototype = Object.create(Piece.prototype);
 Bishop.prototype.constructor = Bishop;
 
-let blackBishopOne = new Bishop("black", 2);
-let blackBishopTwo = new Bishop("black", 5);
+let blackBishopOne = new Bishop("black", 2, 103);
+let blackBishopTwo = new Bishop("black", 5, 106);
 
-let whiteBishopOne = new Bishop("white", 58);
-let whiteBishopTwo = new Bishop("white", 61);
-
-
+let whiteBishopOne = new Bishop("white", 58, 127);
+let whiteBishopTwo = new Bishop("white", 61, 130);
 
 
 
-function King(color, location) {
+
+
+function King(color, location, pieceId) {
   Piece.call(this);
   this.color = color;
   this.location = location;
+  this.id = pieceId;
   // castling
   // movement changes boolean value
   this.hasMoved = false;
   this.moves = [/* info about all four directions */];
   this.attack = [/* capture is same as movement */];
   // cannot move into check
+  this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_kdt60.png";
+    this.image.classList.add('blackPiece');
   } else {
     this.img_src = "./assets/Chess_klt60.png";
+    this.image.classList.add('whitePiece');
   }
-  this.image = document.createElement('img');
   this.image.src = this.img_src;
+  this.image.id = pieceId;
   this.render = function(imgNode, location) {
     document.getElementById(location).appendChild(imgNode);
-  }(this.image, this.location)
+  }
+  this.render(this.image, this.location)
 }
 
 King.prototype = Object.create(Piece.prototype);
 King.prototype.constructor = King;
 
-let blackKingOne = new King("black", 4);
+let blackKingOne = new King("black", 4, 105);
 
-let whiteKingOne = new King("white", 60);
-
-
+let whiteKingOne = new King("white", 60, 129);
 
 
-function Queen(color, location) {
+
+
+function Queen(color, location, pieceId) {
   Piece.call(this);
   this.color = color;
   this.location = location;
+  this.id = pieceId;
   this.moves = [/* info about up/down & left/right */];
   this.attack = [/* capture is same as movement */];
+  this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_qdt60.png";
+    this.image.classList.add('blackPiece');
   } else {
     this.img_src = "./assets/Chess_qlt60.png";
+    this.image.classList.add('whitePiece');
   }
-  this.image = document.createElement('img');
   this.image.src = this.img_src;
+  this.image.id = pieceId;
   this.render = function(imgNode, location) {
     document.getElementById(location).appendChild(imgNode);
-  }(this.image, this.location)
+  }
+  this.render(this.image, this.location)
 }
 
 Queen.prototype = Object.create(Piece.prototype);
 Queen.prototype.constructor = Queen;
 
-let blackQueenOne = new Queen("black", 3);
+let blackQueenOne = new Queen("black", 3, 104);
 
-let whiteQueenOne = new Queen("white", 59);
-
-
+let whiteQueenOne = new Queen("white", 59, 128);
 
 
 
-
+piecesArray.push(blackRookOne, blackKnightOne, blackBishopOne, blackQueenOne, blackKingOne, blackBishopTwo, blackKnightTwo, blackRookTwo, blackPawnOne, blackPawnTwo, blackPawnThree, blackPawnFour, blackPawnFive, blackPawnSix, blackPawnSeven, blackPawnEight)
+piecesArray.push(whitePawnOne, whitePawnTwo, whitePawnThree, whitePawnFour, whitePawnFive, whitePawnSix, whitePawnSeven, whitePawnEight, whiteRookOne, whiteKnightOne, whiteBishopOne, whiteQueenOne, whiteKingOne, whiteBishopTwo, whiteKnightTwo, whiteRookTwo)
+console.log(piecesArray)
 
 
 
@@ -320,13 +341,13 @@ function GameState() {
         piece.removeEventListener('click', callbackerooni);
       })
       gameState.selectedPiece = e.target;
-      console.log(gameState.selectedPiece)
-      return gameState.secondPartTurn()
+      console.log(gameState.selectedPiece);
+      return setTimeout(gameState.secondPartTurn, 0);
     }
   }
 
   this.secondPartTurn = function() {
-    console.log(this.selectedPiece)
+    console.log(gameState.selectedPiece);
     // handle movement
     // add event listener to every square that selectedPiece can move to
     // each piece is an object that has information regarding where it can move/capture
@@ -343,12 +364,20 @@ function GameState() {
       squares.forEach(square => {
         square.removeEventListener('click', callerbacker);
       })
-      // let selectedSquare = e.target;
-      // gameState.selectedPiece is the image tag associated with the selectedPiece object
-      // need to grab object from image
-      // give each image tag a unique chess piece id and then I will be able to easily go from one to the other
-      gameState.selectedPiece.id = e.target.id;
-      gameState.selectedPiece.render();
+      // console.log(gameState.selectedPiece);
+      // console.log(gameState.selectedPiece.id); // id of object which is same as id of image tag
+      // console.log(piecesArray[16].id)
+      let pieceObject = function() {
+        for (i=0; i<piecesArray.length; i++) {
+          if (piecesArray[i].id == gameState.selectedPiece.id) {
+            return piecesArray[i];
+          }
+        }
+      }()
+      console.log(pieceObject);
+      pieceObject.location = e.target.id;
+      pieceObject.render(gameState.selectedPiece, pieceObject.location);
+      gameState.isWhiteTurn = !gameState.isWhiteTurn;
       return gameState.firstPartTurn()
     }
   }
