@@ -61,6 +61,8 @@ let piecesArray = [];
 
 // need to handle capturing - maybe I can put on Piece constructor?
 
+// handle pawn promotion
+
 
 
 function Piece() {
@@ -74,15 +76,17 @@ function Pawn(color, location, pieceId) {
   this.color = color;
   this.location = location;
   this.id = pieceId;
-  this.moves = [/* info about one square forward or if firstMove can move two */];
-  this.attack = [/* info about side-ways attack */];
   this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_pdt60.png";
     this.image.classList.add('blackPiece');
+    this.moves = [8, 16];
+    this.attack = [7, 9];
   } else {
     this.img_src = "./assets/Chess_plt60.png";
     this.image.classList.add('whitePiece');
+    this.moves = [-8, -16];
+    this.attack = [-7, -9];
   }
   this.image.src = this.img_src;
   this.image.id = pieceId;
@@ -315,7 +319,7 @@ console.log(piecesArray)
 
 function GameState() {
   this.isWhiteTurn = true;
-  this.selectedPiece = null;
+  this.selectedPieceImg = null;
 
   this.firstPartTurn = function() {
     if (gameState.isWhiteTurn) { 
@@ -340,43 +344,44 @@ function GameState() {
       playablePieces.forEach(piece => {
         piece.removeEventListener('click', callbackerooni);
       })
-      gameState.selectedPiece = e.target;
-      console.log(gameState.selectedPiece);
+      gameState.selectedPieceImg = e.target;
+      console.log(gameState.selectedPieceImg);
       return setTimeout(gameState.secondPartTurn, 0);
     }
   }
 
   this.secondPartTurn = function() {
-    console.log(gameState.selectedPiece);
+    console.log(gameState.selectedPieceImg);
     // handle movement
-    // add event listener to every square that selectedPiece can move to
+    // add event listener to every square that selectedPieceImg can move to
     // each piece is an object that has information regarding where it can move/capture
-
-
-
-    // first test simple scenario
-    let squares = document.querySelectorAll('.square');
-    squares.forEach(square => {
-      square.addEventListener('click', callerbacker);
+    let selectedObj = findObjFromImg();
+    selectedObj.moves.forEach(move => {
+      console.log(selectedObj.location+move)
+      document.getElementById(`${selectedObj.location+move}`).addEventListener('click', callerbacker);
     })
-    function callerbacker(e) {
-      let squares = document.querySelectorAll('.square');
-      squares.forEach(square => {
-        square.removeEventListener('click', callerbacker);
-      })
-      // console.log(gameState.selectedPiece);
-      // console.log(gameState.selectedPiece.id); // id of object which is same as id of image tag
-      // console.log(piecesArray[16].id)
-      let pieceObject = function() {
+    // first test simple scenario
+    // let squares = document.querySelectorAll('.square');
+    // squares.forEach(square => {
+    //   square.addEventListener('click', callerbacker);
+    // })
+    function findObjFromImg() {
+      return function() {
         for (i=0; i<piecesArray.length; i++) {
-          if (piecesArray[i].id == gameState.selectedPiece.id) {
+          if (piecesArray[i].id == gameState.selectedPieceImg.id) {
             return piecesArray[i];
           }
         }
       }()
-      console.log(pieceObject);
-      pieceObject.location = e.target.id;
-      pieceObject.render(gameState.selectedPiece, pieceObject.location);
+    }
+
+    function callerbacker(e) {
+      document.querySelectorAll('.square').forEach(square => {
+        square.removeEventListener('click', callerbacker);
+      })
+      let pieceObject = findObjFromImg();
+      pieceObject.location = parseInt(e.target.id);
+      pieceObject.render(gameState.selectedPieceImg, pieceObject.location);
       gameState.isWhiteTurn = !gameState.isWhiteTurn;
       return gameState.firstPartTurn()
     }
