@@ -71,6 +71,7 @@ function Piece() {
 
 function Pawn(color, location, pieceId) {
   Piece.call(this);
+  this.pieceType = "pawn"
   // movement changes boolean value
   this.hasMoved = false;
   this.color = color;
@@ -122,6 +123,7 @@ let whitePawnEight = new Pawn("white", 55, 124);
 
 function Rook(color, location, pieceId) {
   Piece.call(this);
+  this.pieceType = "rook"
   this.color = color;
   this.location = location;
   this.id = pieceId;
@@ -159,6 +161,7 @@ let whiteRookTwo = new Rook("white", 63, 132);
 
 function Knight(color, location, pieceId) {
   Piece.call(this);
+  this.pieceType = "knight"
   this.color = color;
   this.location = location;
   this.id = pieceId;
@@ -195,6 +198,7 @@ let whiteKnightTwo = new Knight("white", 62, 131);
 
 function Bishop(color, location, pieceId) {
   Piece.call(this);
+  this.pieceType = "bishop"
   this.color = color;
   this.location = location;
   this.id = pieceId;
@@ -231,6 +235,7 @@ let whiteBishopTwo = new Bishop("white", 61, 130);
 
 function King(color, location, pieceId) {
   Piece.call(this);
+  this.pieceType = "king"
   this.color = color;
   this.location = location;
   this.id = pieceId;
@@ -268,6 +273,7 @@ let whiteKingOne = new King("white", 60, 129);
 
 function Queen(color, location, pieceId) {
   Piece.call(this);
+  this.pieceType = "queen"
   this.color = color;
   this.location = location;
   this.id = pieceId;
@@ -382,8 +388,14 @@ function GameState() {
       let pieceObject = findObjFromImg();
       pieceObject.location = parseInt(e.target.id);
       pieceObject.render(gameState.selectedPieceImg, pieceObject.location);
+      if (pieceObject.pieceType === "pawn") {
+        if (pieceObject.hasMoved === false) {
+          pieceObject.hasMoved = true;
+          pieceObject.moves.pop();
+        }
+      }
       gameState.isWhiteTurn = !gameState.isWhiteTurn;
-      return gameState.firstPartTurn()
+      return gameState.firstPartTurn();
     }
   }
 }
