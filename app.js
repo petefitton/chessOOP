@@ -134,7 +134,12 @@ function Rook(color, location, pieceId) {
   this.id = pieceId;
   // movement changes boolean value
   this.hasMoved = false;
-  this.moves = [/* info about up/down & left/right */];
+  this.moves = [
+    [8, 16, 24, 32, 40, 48, 56],
+    [-8, -16, -24, -32, -40, -48, -56],
+    [1, 2, 3, 4, 5, 6, 7],
+    [-1, -2, -3, -4, -5, -6, -7]
+  ];
   this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -170,7 +175,9 @@ function Knight(color, location, pieceId) {
   this.color = color;
   this.location = location;
   this.id = pieceId;
-  this.moves = [/* info about 2x1 movement (staying on board) */];
+  this.moves = [
+    -6, -15, -17, -10, 6, 10, 15, 17
+  ];
   this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -207,7 +214,12 @@ function Bishop(color, location, pieceId) {
   this.color = color;
   this.location = location;
   this.id = pieceId;
-  this.moves = [/* info about diagonals */];
+  this.moves = [
+    [9, 18, 27, 36, 45, 54, 63],
+    [-9, -18, -27, -36, -45, -54, -63],
+    [7, 14, 21, 28, 35, 42, 49],
+    [-7, -14, -21, -28, -35, -42, -49]
+  ];
   this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -247,7 +259,16 @@ function King(color, location, pieceId) {
   // castling
   // movement changes boolean value
   this.hasMoved = false;
-  this.moves = [/* info about all four directions */];
+  this.moves = [
+    [8],
+    [-8],
+    [1],
+    [-1],
+    [9],
+    [-9],
+    [7],
+    [-7]
+  ];
   this.attack = [/* capture is same as movement */];
   // cannot move into check
   this.image = document.createElement('img');
@@ -282,7 +303,16 @@ function Queen(color, location, pieceId) {
   this.color = color;
   this.location = location;
   this.id = pieceId;
-  this.moves = [/* info about up/down & left/right */];
+  this.moves = [
+    [8, 16, 24, 32, 40, 48, 56],
+    [-8, -16, -24, -32, -40, -48, -56],
+    [1, 2, 3, 4, 5, 6, 7],
+    [-1, -2, -3, -4, -5, -6, -7],
+    [9, 18, 27, 36, 45, 54, 63],
+    [-9, -18, -27, -36, -45, -54, -63],
+    [7, 14, 21, 28, 35, 42, 49],
+    [-7, -14, -21, -28, -35, -42, -49]
+  ];
   this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -362,14 +392,14 @@ function GameState() {
     // add event listener to every square that selectedPieceImg can move to
     // each piece is an object that has information regarding where it can move/capture
     let selectedObj = findObjFromGameStateSelectedPieceImg();
-    selectedObj.moves.forEach((move, index) => {
-      console.log(selectedObj.location+move)
-      // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
-      if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
-        // do nothing
-        console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
-      } else {
-        if (selectedObj.pieceType === "pawn") {
+    if (selectedObj.pieceType === "pawn") {
+      selectedObj.moves.forEach((move, index) => {
+        console.log(selectedObj.location+move)
+        // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
+        if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
+          // do nothing
+          console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
+        } else {
           if (index > 0) {
             // check to make sure nothing occupies space directly in front of pawn if the pawn is moving two forward squares on first turn
             if (document.getElementById(`${selectedObj.location+selectedObj.moves[0]}`).childNodes.length > 0) {
@@ -380,12 +410,53 @@ function GameState() {
           } else {
             document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
           }
-          // else if statements for each piece type to follow below here
+        }
+      })
+    } else if (selectedObj.pieceType === "queen" || "king" || "bishop" || "rook") {
+      selectedObj.moves.forEach((moveArray, index) => {
+        moveArray.forEach((move, index) => {
+          let isLastMove = false;
+          if (selectedObj.location+move < 0 || selectedObj.location+move > 63) {
+            return
+          }
+          // do not allow piece to move by passing through sides of board
+
+
+          // WORKING ON THIS CODE
+          // UNFINISHED BELOW
+          if (selectedObj.location+move % 8 === 7 || selectedObj.location+move % 8 === 0) {
+            isLastMove = true;
+          }
+
+
+
+          
+          console.log(selectedObj.location+move)
+          // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
+          if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
+            // there is a piece there which can be captured
+            document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
+            console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
+            return
+          } else {
+            if (isLastMove) {
+              document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
+              return
+            }
+            document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
+          }
+        })
+      })
+    } else if (selectedObj.pieceType === "knight") {
+      selectedObj.moves.forEach((move, index) => {
+        if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
+          // there is a piece there which can be captured
+          document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
         } else {
           document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
         }
-      }
-    })
+      })
+    }
     if (selectedObj.pieceType === "pawn") {
       selectedObj.attack.forEach((attack, index) => {
         if (document.getElementById(`${selectedObj.location+attack}`).childNodes.length > 0) {
