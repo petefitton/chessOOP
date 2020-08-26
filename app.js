@@ -50,6 +50,8 @@ let gameboard = new Gameboard();
 
 let piecesArray = [];
 
+let capturedPieces = [];
+
 
 // A pawn will need the following:
 // color, movement patterns, attack patterns, firstMove boolean for movement pattern purposes
@@ -92,6 +94,8 @@ function Pawn(color, location, pieceId) {
   this.image.src = this.img_src;
   this.image.id = pieceId;
   this.render = function(imgNode, location) {
+    console.log(location)
+    console.log(document.getElementById(location))
     document.getElementById(location).appendChild(imgNode);
   }
   this.render(this.image, this.location);
@@ -344,6 +348,7 @@ function GameState() {
   function selectPiece(e) {
     document.querySelectorAll('.square').forEach(square => {
       square.removeEventListener('click', movePiece);
+      square.removeEventListener('click', capturePiece);
     })
     gameState.selectedPieceImg = e.target;
     console.log(gameState.selectedPieceImg);
@@ -380,6 +385,11 @@ function GameState() {
         }
       }
     })
+    selectedObj.attack.forEach((attack, index) => {
+      if (document.getElementById(`${selectedObj.location+attack}`).childNodes.length > 0) {
+        document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
+      }
+    })
     // first test simple scenario
     // let squares = document.querySelectorAll('.square');
     // squares.forEach(square => {
@@ -411,6 +421,7 @@ function GameState() {
 
     document.querySelectorAll('.square').forEach(square => {
       square.removeEventListener('click', movePiece);
+      square.removeEventListener('click', capturePiece);
     })
     let pieceObject = findObjFromGameStateSelectedPieceImg();
     pieceObject.location = parseInt(e.target.id);
@@ -423,6 +434,51 @@ function GameState() {
     }
     gameState.isWhiteTurn = !gameState.isWhiteTurn;
     return gameState.firstPartTurn();
+  }
+
+  function capturePiece(e) {
+    // should move to that location, should remove that piece from board, should progress turn
+    // should check for check and checkmate
+    let playablePieces
+    if (gameState.isWhiteTurn) { 
+      playablePieces = document.querySelectorAll('.whitePiece');
+    } else {
+      playablePieces = document.querySelectorAll('.blackPiece');
+    }
+    console.log(playablePieces)
+    playablePieces.forEach(piece => {
+      piece.removeEventListener('click', selectPiece);
+    })
+
+    document.querySelectorAll('.square').forEach(square => {
+      square.removeEventListener('click', movePiece);
+      square.removeEventListener('click', capturePiece);
+    })
+    let capturedImg = document.getElementById(`${e.target.id}`);
+    let capturedObject = findCapturedObj(capturedImg);
+    capturedImg.remove();
+    capturedPieces.push(capturedObject)
+    let pieceObject = findObjFromGameStateSelectedPieceImg();
+    pieceObject.location = capturedObject.location;
+    pieceObject.render(gameState.selectedPieceImg, pieceObject.location);
+    if (pieceObject.pieceType === "pawn") {
+      if (pieceObject.hasMoved === false) {
+        pieceObject.hasMoved = true;
+        pieceObject.moves.pop();
+      }
+    }
+    gameState.isWhiteTurn = !gameState.isWhiteTurn;
+    return gameState.firstPartTurn();
+  }
+
+  function findCapturedObj(imgElem) {
+    return function(imgElem) {
+      for (i=0; i<piecesArray.length; i++) {
+        if (piecesArray[i].id == imgElem.id) {
+          return piecesArray[i];
+        }
+      }
+    }(imgElem)
   }
 }
 
