@@ -339,21 +339,12 @@ function GameState() {
         piece.addEventListener('click', callbackerooni);
       })
     }
-    function callbackerooni(e) {
-      let playablePieces
-      if (gameState.isWhiteTurn) { 
-        playablePieces = document.querySelectorAll('.whitePiece');
-      } else {
-        playablePieces = document.querySelectorAll('.blackPiece');
-      }
-      console.log(playablePieces)
-      playablePieces.forEach(piece => {
-        piece.removeEventListener('click', callbackerooni);
-      })
-      gameState.selectedPieceImg = e.target;
-      console.log(gameState.selectedPieceImg);
-      return setTimeout(gameState.secondPartTurn, 0);
-    }
+  }
+
+  function callbackerooni(e) {
+    gameState.selectedPieceImg = e.target;
+    console.log(gameState.selectedPieceImg);
+    return setTimeout(gameState.secondPartTurn, 0);
   }
 
   this.secondPartTurn = function() {
@@ -361,42 +352,74 @@ function GameState() {
     // handle movement
     // add event listener to every square that selectedPieceImg can move to
     // each piece is an object that has information regarding where it can move/capture
-    let selectedObj = findObjFromImg();
-    selectedObj.moves.forEach(move => {
+    let selectedObj = findObjFromGameStateSelectedPieceImg();
+    selectedObj.moves.forEach((move, index) => {
       console.log(selectedObj.location+move)
-      document.getElementById(`${selectedObj.location+move}`).addEventListener('click', callerbacker);
+      // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
+      if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
+        // do nothing
+        console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
+      } else {
+        if (selectedObj.pieceType === "pawn") {
+          if (index > 0) {
+            // check to make sure nothing occupies space directly in front of pawn if the pawn is moving two forward squares on first turn
+            if (document.getElementById(`${selectedObj.location+selectedObj.moves[0]}`).childNodes.length > 0) {
+              // do nothing
+            } else {
+              document.getElementById(`${selectedObj.location+move}`).addEventListener('click', callerbacker);
+            }
+          } else {
+            document.getElementById(`${selectedObj.location+move}`).addEventListener('click', callerbacker);
+          }
+          // else if statements for each piece type to follow below here
+        } else {
+          document.getElementById(`${selectedObj.location+move}`).addEventListener('click', callerbacker);
+        }
+      }
     })
     // first test simple scenario
     // let squares = document.querySelectorAll('.square');
     // squares.forEach(square => {
     //   square.addEventListener('click', callerbacker);
     // })
-    function findObjFromImg() {
-      return function() {
-        for (i=0; i<piecesArray.length; i++) {
-          if (piecesArray[i].id == gameState.selectedPieceImg.id) {
-            return piecesArray[i];
-          }
-        }
-      }()
-    }
-
-    function callerbacker(e) {
-      document.querySelectorAll('.square').forEach(square => {
-        square.removeEventListener('click', callerbacker);
-      })
-      let pieceObject = findObjFromImg();
-      pieceObject.location = parseInt(e.target.id);
-      pieceObject.render(gameState.selectedPieceImg, pieceObject.location);
-      if (pieceObject.pieceType === "pawn") {
-        if (pieceObject.hasMoved === false) {
-          pieceObject.hasMoved = true;
-          pieceObject.moves.pop();
+  }
+  
+  function findObjFromGameStateSelectedPieceImg() {
+    return function() {
+      for (i=0; i<piecesArray.length; i++) {
+        if (piecesArray[i].id == gameState.selectedPieceImg.id) {
+          return piecesArray[i];
         }
       }
-      gameState.isWhiteTurn = !gameState.isWhiteTurn;
-      return gameState.firstPartTurn();
+    }()
+  }
+
+  function callerbacker(e) {
+    let playablePieces
+    if (gameState.isWhiteTurn) { 
+      playablePieces = document.querySelectorAll('.whitePiece');
+    } else {
+      playablePieces = document.querySelectorAll('.blackPiece');
     }
+    console.log(playablePieces)
+    playablePieces.forEach(piece => {
+      piece.removeEventListener('click', callbackerooni);
+    })
+
+    document.querySelectorAll('.square').forEach(square => {
+      square.removeEventListener('click', callerbacker);
+    })
+    let pieceObject = findObjFromGameStateSelectedPieceImg();
+    pieceObject.location = parseInt(e.target.id);
+    pieceObject.render(gameState.selectedPieceImg, pieceObject.location);
+    if (pieceObject.pieceType === "pawn") {
+      if (pieceObject.hasMoved === false) {
+        pieceObject.hasMoved = true;
+        pieceObject.moves.pop();
+      }
+    }
+    gameState.isWhiteTurn = !gameState.isWhiteTurn;
+    return gameState.firstPartTurn();
   }
 }
 
