@@ -84,7 +84,8 @@ function Pawn(color, location, pieceId) {
     this.img_src = "./assets/Chess_pdt60.png";
     this.image.classList.add('blackPiece');
     this.moves = [8, 16];
-    this.attack = [7, 9];
+    // black attack inverted to 9 and 7 for simplified capturing logic located in GameState.secondPartTurn
+    this.attack = [9, 7];
   } else {
     this.img_src = "./assets/Chess_plt60.png";
     this.image.classList.add('whitePiece');
@@ -385,11 +386,23 @@ function GameState() {
         }
       }
     })
-    selectedObj.attack.forEach((attack, index) => {
-      if (document.getElementById(`${selectedObj.location+attack}`).childNodes.length > 0) {
-        document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
-      }
-    })
+    if (selectedObj.pieceType === "pawn") {
+      selectedObj.attack.forEach((attack, index) => {
+        if (document.getElementById(`${selectedObj.location+attack}`).childNodes.length > 0) {
+          if (selectedObj.location % 8 === 7) {
+            if (index === 1) {
+              document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
+            }
+          } else if (selectedObj.location % 8 === 0) {
+            if (index === 0) {
+              document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
+            }
+          } else {
+            document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
+          }
+        }
+      })
+    }
     // first test simple scenario
     // let squares = document.querySelectorAll('.square');
     // squares.forEach(square => {
