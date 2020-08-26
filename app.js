@@ -331,17 +331,20 @@ function GameState() {
     if (gameState.isWhiteTurn) { 
       let playablePieces = document.querySelectorAll('.whitePiece');
       playablePieces.forEach(piece => {
-        piece.addEventListener('click', callbackerooni);
+        piece.addEventListener('click', selectPiece);
       })
     } else {
       let playablePieces = document.querySelectorAll('.blackPiece');
       playablePieces.forEach(piece => {
-        piece.addEventListener('click', callbackerooni);
+        piece.addEventListener('click', selectPiece);
       })
     }
   }
 
-  function callbackerooni(e) {
+  function selectPiece(e) {
+    document.querySelectorAll('.square').forEach(square => {
+      square.removeEventListener('click', movePiece);
+    })
     gameState.selectedPieceImg = e.target;
     console.log(gameState.selectedPieceImg);
     return setTimeout(gameState.secondPartTurn, 0);
@@ -366,21 +369,21 @@ function GameState() {
             if (document.getElementById(`${selectedObj.location+selectedObj.moves[0]}`).childNodes.length > 0) {
               // do nothing
             } else {
-              document.getElementById(`${selectedObj.location+move}`).addEventListener('click', callerbacker);
+              document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
             }
           } else {
-            document.getElementById(`${selectedObj.location+move}`).addEventListener('click', callerbacker);
+            document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
           }
           // else if statements for each piece type to follow below here
         } else {
-          document.getElementById(`${selectedObj.location+move}`).addEventListener('click', callerbacker);
+          document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
         }
       }
     })
     // first test simple scenario
     // let squares = document.querySelectorAll('.square');
     // squares.forEach(square => {
-    //   square.addEventListener('click', callerbacker);
+    //   square.addEventListener('click', movePiece);
     // })
   }
   
@@ -394,7 +397,7 @@ function GameState() {
     }()
   }
 
-  function callerbacker(e) {
+  function movePiece(e) {
     let playablePieces
     if (gameState.isWhiteTurn) { 
       playablePieces = document.querySelectorAll('.whitePiece');
@@ -403,11 +406,11 @@ function GameState() {
     }
     console.log(playablePieces)
     playablePieces.forEach(piece => {
-      piece.removeEventListener('click', callbackerooni);
+      piece.removeEventListener('click', selectPiece);
     })
 
     document.querySelectorAll('.square').forEach(square => {
-      square.removeEventListener('click', callerbacker);
+      square.removeEventListener('click', movePiece);
     })
     let pieceObject = findObjFromGameStateSelectedPieceImg();
     pieceObject.location = parseInt(e.target.id);
