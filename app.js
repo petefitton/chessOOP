@@ -420,23 +420,36 @@ function GameState() {
             return
           }
           // do not allow piece to move by passing through sides of board
-
-
-          // WORKING ON THIS CODE
-          // UNFINISHED BELOW
+            // if queen is already on right side, do not let go through right side to far left side
+            // if queen is not already on right side, let queen move to right side but not beyond
+            // same for those two but for left side
+          if (selectedObj.location % 8 === 7 && move === 1 || move === 9 || move === -7) {
+            return
+          } else if (selectedObj.location % 8 === 0 && move === -1 || move === 7 || move === -9) {
+            return
+          }
           if (selectedObj.location+move % 8 === 7 || selectedObj.location+move % 8 === 0) {
             isLastMove = true;
           }
-
-
-
-          
           console.log(selectedObj.location+move)
           // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
           if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
             // there is a piece there which can be captured
-            document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
-            console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
+            if (gameState.isWhiteTurn) {
+              console.log(document.getElementById(`${selectedObj.location+move}`).classList)
+              console.log("^^^^^^ class list from potential attack div")
+              if (document.getElementById(`${selectedObj.location+move}`).childNodes[0].classList[1] === "black") {
+                document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
+                console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
+                return
+              }
+            } else {
+              if (document.getElementById(`${selectedObj.location+move}`).childNodes[0].classList[1] === "white") {
+                document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
+                console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
+                return
+              }
+            }
             return
           } else {
             if (isLastMove) {
@@ -459,18 +472,56 @@ function GameState() {
     }
     if (selectedObj.pieceType === "pawn") {
       selectedObj.attack.forEach((attack, index) => {
+        console.log("HUR, below is ID of DOM node being grabbed")
+        console.log(`${selectedObj.location+attack}`)
+        console.log(document.getElementById(`${selectedObj.location+attack}`).childNodes)
+        console.log("^^^^^^ class list from potential attack div")
+        // console.log(document.getElementById(`${selectedObj.location+attack}`).childNodes[0])
+        // console.log(document.getElementById(`${selectedObj.location+attack}`).childNodes[0].classList)
+        // console.log(document.getElementById(`${selectedObj.location+attack}`).childNodes[0].classList === "blackPiece")
         if (document.getElementById(`${selectedObj.location+attack}`).childNodes.length > 0) {
-          if (selectedObj.location % 8 === 7) {
-            if (index === 1) {
+          console.log(gameState.isWhiteTurn)
+          console.log(document.getElementById(`${selectedObj.location+attack}`).childNodes[0].classList[0])
+          if (document.getElementById(`${selectedObj.location+attack}`).childNodes[0].classList[0] === "blackPiece" && gameState.isWhiteTurn) {
+            if (selectedObj.location % 8 === 7) {
+              if (index === 1) {
+                console.log('test1')
+                document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
+              }
+            } else if (selectedObj.location % 8 === 0) {
+              console.log('test2')
+              if (index === 0) {
+                console.log('test3')
+                document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
+              }
+            } else {
+              console.log('test4')
+              console.log("hittin' here")
               document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
             }
-          } else if (selectedObj.location % 8 === 0) {
-            if (index === 0) {
+          } else if ((document.getElementById(`${selectedObj.location+attack}`).childNodes[0].classList[0] === "whitePiece" && gameState.isWhiteTurn === false)) {
+            console.log('test5')
+            if (selectedObj.location % 8 === 7) {
+              console.log('test6')
+              if (index === 1) {
+                console.log('test7')
+                document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
+              }
+            } else if (selectedObj.location % 8 === 0) {
+              console.log('test8')
+              if (index === 0) {
+                console.log('test9')
+                document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
+              }
+            } else {
+              console.log('test10')
+              console.log("hittin' here")
               document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
             }
-          } else {
-            document.getElementById(`${selectedObj.location+attack}`).addEventListener('click', capturePiece);
           }
+          console.log('test11')
+        } else {
+          console.log('test12')
         }
       })
     }
@@ -498,7 +549,7 @@ function GameState() {
     } else {
       playablePieces = document.querySelectorAll('.blackPiece');
     }
-    console.log(playablePieces)
+    // console.log(playablePieces)
     playablePieces.forEach(piece => {
       piece.removeEventListener('click', selectPiece);
     })
