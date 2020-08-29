@@ -8,33 +8,46 @@
 
 
 
+// gameboard originally designed as a single array containing a set of squares between 0 through 64
+// what about changing that to be an object with keys for a-g and arrays at each key from 0 through 7?
+// how to handle logic for moves between letters? how can I subtract letters?
+  // if letters are base 18 numbers then I can limit the calculations between a-g (inclusive of both)
+  //convert from base 18 to a number:
+  // parseInt(string, radix)
+  //convert from that number to base 18
+  // NumberObject.toString(radix)
+
+
 // use OOP to create gameboard
+
 
 function Gameboard() {
   this.gameboard = [];
 
-  let row = 1;
-  for (i=0; i<64; i++) {
-    this.gameboard.push(i);
-    let square = document.createElement('div');
-    square.classList.add('square');
-    square.id = i;
-    if (i%2 === 0) {
-      if (row%2 != 0) {
-        square.classList.add('white');
-      } else {
-        square.classList.add('black');
+  for (i=8; i>0; i--) {
+    for (j=0; j<8; j++) {
+      let k = (j+10).toString(18);
+      if (!this.gameboard[i]) {
+        this.gameboard[i] = [];
       }
-    } else {
-      if (row%2 != 0) {
-        square.classList.add('black');
+      this.gameboard[i].push(k);
+      let square = document.createElement('div');
+      square.classList.add('square');
+      square.id = `${k}${i}`;
+      if (i%2 === 0) {
+        if (j%2 === 0) {
+          square.classList.add('white');
+        } else {
+          square.classList.add('black');
+        }
       } else {
-        square.classList.add('white');
+        if (j%2 === 0) {
+          square.classList.add('black');
+        } else {
+          square.classList.add('white');
+        }
       }
-    }
-    document.querySelector('.gameboard').appendChild(square);
-    if (i===(row*8-1)) {
-      row++;
+      document.querySelector('.gameboard').appendChild(square);
     }
   }
 }
@@ -43,7 +56,9 @@ let gameboard = new Gameboard();
 
 
 
-
+// LAST CHANGED GAMEBOARD TO BE STANDARD CONVENTION
+// object with numbered keys, each containing an array as a value which contains [a,b,c...h]
+// next TODO: update moves for each piece and then handle moves in GameState object accordingly
 
 
 
@@ -105,23 +120,23 @@ function Pawn(color, location, pieceId) {
 Pawn.prototype = Object.create(Piece.prototype);
 Pawn.prototype.constructor = Pawn;
 
-let blackPawnOne = new Pawn("black", 8, 109);
-let blackPawnTwo = new Pawn("black", 9, 110);
-let blackPawnThree = new Pawn("black", 10, 111);
-let blackPawnFour = new Pawn("black", 11, 112);
-let blackPawnFive = new Pawn("black", 12, 113);
-let blackPawnSix = new Pawn("black", 13, 114);
-let blackPawnSeven = new Pawn("black", 14, 115);
-let blackPawnEight = new Pawn("black", 15, 116);
+let blackPawnOne = new Pawn("black", "a7", 109);
+let blackPawnTwo = new Pawn("black", "b7", 110);
+let blackPawnThree = new Pawn("black", "c7", 111);
+let blackPawnFour = new Pawn("black", "d7", 112);
+let blackPawnFive = new Pawn("black", "e7", 113);
+let blackPawnSix = new Pawn("black", "f7", 114);
+let blackPawnSeven = new Pawn("black", "g7", 115);
+let blackPawnEight = new Pawn("black", "h7", 116);
 
-let whitePawnOne = new Pawn("white", 48, 117);
-let whitePawnTwo = new Pawn("white", 49, 118);
-let whitePawnThree = new Pawn("white", 50, 119);
-let whitePawnFour = new Pawn("white", 51, 120);
-let whitePawnFive = new Pawn("white", 52, 121);
-let whitePawnSix = new Pawn("white", 53, 122);
-let whitePawnSeven = new Pawn("white", 54, 123);
-let whitePawnEight = new Pawn("white", 55, 124);
+let whitePawnOne = new Pawn("white", "a2", 117);
+let whitePawnTwo = new Pawn("white", "b2", 118);
+let whitePawnThree = new Pawn("white", "c2", 119);
+let whitePawnFour = new Pawn("white", "d2", 120);
+let whitePawnFive = new Pawn("white", "e2", 121);
+let whitePawnSix = new Pawn("white", "f2", 122);
+let whitePawnSeven = new Pawn("white", "g2", 123);
+let whitePawnEight = new Pawn("white", "h2", 124);
 
 
 
@@ -160,11 +175,11 @@ function Rook(color, location, pieceId) {
 Rook.prototype = Object.create(Piece.prototype);
 Rook.prototype.constructor = Rook;
 
-let blackRookOne = new Rook("black", 0, 101);
-let blackRookTwo = new Rook("black", 7, 108);
+let blackRookOne = new Rook("black", "a8", 101);
+let blackRookTwo = new Rook("black", "h8", 108);
 
-let whiteRookOne = new Rook("white", 56, 125);
-let whiteRookTwo = new Rook("white", 63, 132);
+let whiteRookOne = new Rook("white", "a1", 125);
+let whiteRookTwo = new Rook("white", "h1", 132);
 
 
 
@@ -198,11 +213,11 @@ function Knight(color, location, pieceId) {
 Knight.prototype = Object.create(Piece.prototype);
 Knight.prototype.constructor = Knight;
 
-let blackKnightOne = new Knight("black", 1, 102);
-let blackKnightTwo = new Knight("black", 6, 107);
+let blackKnightOne = new Knight("black", "b8", 102);
+let blackKnightTwo = new Knight("black", "g8", 107);
 
-let whiteKnightOne = new Knight("white", 57, 126);
-let whiteKnightTwo = new Knight("white", 62, 131);
+let whiteKnightOne = new Knight("white", "b1", 126);
+let whiteKnightTwo = new Knight("white", "g1", 131);
 
 
 
@@ -240,11 +255,11 @@ function Bishop(color, location, pieceId) {
 Bishop.prototype = Object.create(Piece.prototype);
 Bishop.prototype.constructor = Bishop;
 
-let blackBishopOne = new Bishop("black", 2, 103);
-let blackBishopTwo = new Bishop("black", 5, 106);
+let blackBishopOne = new Bishop("black", "c8", 103);
+let blackBishopTwo = new Bishop("black", "f8", 106);
 
-let whiteBishopOne = new Bishop("white", 58, 127);
-let whiteBishopTwo = new Bishop("white", 61, 130);
+let whiteBishopOne = new Bishop("white", "c1", 127);
+let whiteBishopTwo = new Bishop("white", "f1", 130);
 
 
 
@@ -290,9 +305,9 @@ function King(color, location, pieceId) {
 King.prototype = Object.create(Piece.prototype);
 King.prototype.constructor = King;
 
-let blackKingOne = new King("black", 4, 105);
+let blackKingOne = new King("black", "e8", 105);
 
-let whiteKingOne = new King("white", 60, 129);
+let whiteKingOne = new King("white", "e1", 129);
 
 
 
@@ -333,9 +348,9 @@ function Queen(color, location, pieceId) {
 Queen.prototype = Object.create(Piece.prototype);
 Queen.prototype.constructor = Queen;
 
-let blackQueenOne = new Queen("black", 3, 104);
+let blackQueenOne = new Queen("black", "d8", 104);
 
-let whiteQueenOne = new Queen("white", 59, 128);
+let whiteQueenOne = new Queen("white", "d1", 128);
 
 
 
