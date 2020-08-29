@@ -1,6 +1,6 @@
 // NOTES FOR WHAT I WAS JUST WORKING ON:
 
-// square id's are 0 through 63
+// square id's are a8-h1
 // each chesspiece image tag also needs an id
   // pawn OBJECT & IMG tag id's are 109-124 (9-24 with 1 at beginning)
 
@@ -27,10 +27,10 @@ function Gameboard() {
   for (i=8; i>0; i--) {
     for (j=0; j<8; j++) {
       let k = (j+10).toString(18);
-      if (!this.gameboard[i]) {
-        this.gameboard[i] = [];
+      if (!this.gameboard[k]) {
+        this.gameboard[k] = [];
       }
-      this.gameboard[i].push(k);
+      this.gameboard[k].push(i);
       let square = document.createElement('div');
       square.classList.add('square');
       square.id = `${k}${i}`;
@@ -53,11 +53,11 @@ function Gameboard() {
 }
 
 let gameboard = new Gameboard();
-
+console.log(gameboard)
 
 
 // LAST CHANGED GAMEBOARD TO BE STANDARD CONVENTION
-// object with numbered keys, each containing an array as a value which contains [a,b,c...h]
+// object with keys a-h, each containing an array as a value which contains [8,7,6...1]
 // next TODO: update moves for each piece and then handle moves in GameState object accordingly
 
 
