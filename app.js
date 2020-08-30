@@ -50,6 +50,9 @@ function Gameboard() {
       document.querySelector('.gameboard').appendChild(square);
     }
   }
+  for (array in this.gameboard) {
+    this.gameboard[array].reverse();
+  }
 }
 
 let gameboard = new Gameboard();
