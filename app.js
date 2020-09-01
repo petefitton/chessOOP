@@ -53,6 +53,45 @@ function Gameboard() {
   for (array in this.gameboard) {
     this.gameboard[array].reverse();
   }
+
+  this.isPositionLegal = function(position) {
+    // is position parameter in octodecimal or decimal?
+    // gonna make it come in as decimal so that isPositionLegal can easily check for moves that will be made
+          // since that logic will require math on current position of piece
+    // will position stay on a file between a1 & a8?
+    if (position >= 181 && position <= 188) {
+      return true;
+    }
+    // will position stay on b file between b1 & b8?
+    if (position >= 199 && position <= 206) {
+      return true;
+    }
+    // c
+    if (position >= 217 && position <= 224) {
+      return true;
+    }
+    // d
+    if (position >= 235 && position <= 242) {
+      return true;
+    }
+    // e
+    if (position >= 253 && position <= 260) {
+      return true;
+    }
+    // f
+    if (position >= 271 && position <= 278) {
+      return true;
+    }
+    // g
+    if (position >= 289 && position <= 296) {
+      return true;
+    }
+    // h
+    if (position >= 307 && position <= 314) {
+      return true;
+    }
+    return false;
+  }
 }
 
 let gameboard = new Gameboard();
@@ -111,14 +150,14 @@ function Pawn(color, location, pieceId) {
     // what is value for a single diagonal?
     // e to f is an increase by 18
     // e to d is a decrease by 18
-    this.attack = [(location)=>(parseInt(location, 18) - 1 + 18).toString(18), (location)=>(parseInt(location, 18) - 1 - 18).toString(18)]
+    this.attack = [(location)=>(parseInt(location, 18) - 1 + 18).toString(18), (location)=>(parseInt(location, 18) - 1 - 18).toString(18)];
   } else {
     this.img_src = "./assets/Chess_plt60.png";
     this.image.classList.add('whitePiece');
     // this.moves = [-8, -16];
     this.moves = [(location)=>(parseInt(location, 18) + 1).toString(18), (location)=>(parseInt(location, 18) + 2).toString(18)];
     // this.attack = [-7, -9];
-    this.attack = [(location)=>(parseInt(location, 18) + 1 + 18).toString(18), (location)=>(parseInt(location, 18) + 1 - 18).toString(18)]
+    this.attack = [(location)=>(parseInt(location, 18) + 1 + 18).toString(18), (location)=>(parseInt(location, 18) + 1 - 18).toString(18)];
   }
   this.image.src = this.img_src;
   this.image.id = pieceId;
@@ -163,11 +202,49 @@ function Rook(color, location, pieceId) {
   // movement changes boolean value
   this.hasMoved = false;
   this.moves = [
-    [8, 16, 24, 32, 40, 48, 56],
-    [-8, -16, -24, -32, -40, -48, -56],
-    [1, 2, 3, 4, 5, 6, 7],
-    [-1, -2, -3, -4, -5, -6, -7]
+    [
+      (location)=>(parseInt(location, 18) - 1).toString(18),
+      (location)=>(parseInt(location, 18) - 2).toString(18),
+      (location)=>(parseInt(location, 18) - 3).toString(18),
+      (location)=>(parseInt(location, 18) - 4).toString(18),
+      (location)=>(parseInt(location, 18) - 5).toString(18),
+      (location)=>(parseInt(location, 18) - 6).toString(18),
+      (location)=>(parseInt(location, 18) - 7).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1).toString(18),
+      (location)=>(parseInt(location, 18) + 2).toString(18),
+      (location)=>(parseInt(location, 18) + 3).toString(18),
+      (location)=>(parseInt(location, 18) + 4).toString(18),
+      (location)=>(parseInt(location, 18) + 5).toString(18),
+      (location)=>(parseInt(location, 18) + 6).toString(18),
+      (location)=>(parseInt(location, 18) + 7).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) - 18).toString(18),
+      (location)=>(parseInt(location, 18) - (18*2)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*3)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*4)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*5)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*6)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*7)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 18).toString(18),
+      (location)=>(parseInt(location, 18) + (18*2)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*3)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*4)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*5)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*6)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*7)).toString(18)
+    ]
   ];
+  // this.moves = [
+  //   [8, 16, 24, 32, 40, 48, 56],
+  //   [-8, -16, -24, -32, -40, -48, -56],
+  //   [1, 2, 3, 4, 5, 6, 7],
+  //   [-1, -2, -3, -4, -5, -6, -7]
+  // ];
   this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -445,49 +522,71 @@ function GameState() {
       })
     } else if (selectedObj.pieceType === "queen" || "king" || "bishop" || "rook") {
       selectedObj.moves.forEach((moveArray, index) => {
+        let continueIteration = true;
         moveArray.forEach((move, index) => {
-          let isLastMove = false;
-          if (selectedObj.location+move < 0 || selectedObj.location+move > 63) {
-            return
-          }
-          // do not allow piece to move by passing through sides of board
-            // if queen is already on right side, do not let go through right side to far left side
-            // if queen is not already on right side, let queen move to right side but not beyond
-            // same for those two but for left side
-          if (selectedObj.location % 8 === 7 && move === 1 || move === 9 || move === -7) {
-            return
-          } else if (selectedObj.location % 8 === 0 && move === -1 || move === 7 || move === -9) {
-            return
-          }
-          if (selectedObj.location+move % 8 === 7 || selectedObj.location+move % 8 === 0) {
-            isLastMove = true;
-          }
-          console.log(selectedObj.location+move)
-          // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
-          if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
-            // there is a piece there which can be captured
-            if (gameState.isWhiteTurn) {
-              console.log(document.getElementById(`${selectedObj.location+move}`).classList)
-              console.log("^^^^^^ class list from potential attack div")
-              if (document.getElementById(`${selectedObj.location+move}`).childNodes[0].classList[1] === "black") {
-                document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
-                console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
-                return
-              }
-            } else {
-              if (document.getElementById(`${selectedObj.location+move}`).childNodes[0].classList[1] === "white") {
-                document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
-                console.log(document.getElementById(`${selectedObj.location+move}`).childNodes.length)
-                return
-              }
-            }
-            return
-          } else {
-            if (isLastMove) {
-              document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
+          if (continueIteration) {
+            // a1 = 181; h8 = 314
+            // gameboard.isPositionLegal() takes a decimal number
+            // check if move position is legal
+            if (!gameboard.isPositionLegal(parseInt(move(selectedObj.location), 18))) {
+              console.log(selectedObj)
+              console.log(selectedObj.location)
+              console.log(move(selectedObj.location))
+              console.log(parseInt(move(selectedObj.location), 18))
+              console.log(gameboard.isPositionLegal(parseInt(move(selectedObj.location), 18)))
+              console.log("hur")
+              continueIteration = false;
               return
             }
-            document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
+            // do not allow piece to move by passing through sides of board
+              // if queen is already on right side, do not let go through right side to far left side
+              // if queen is not already on right side, let queen move to right side but not beyond
+              // same for those two but for left side
+            // if (!gameboard.isPositionLegal(parseInt(move(selectedObj.location)))) {
+            //   return
+            // } else if (selectedObj.location[0] === "a" && parseInt(move(selectedObj.location)) < 181) {
+            //   return
+            // }
+            // // two pieces below might go away, need to look at move()'s up above in constructor objects
+            // if (selectedObj.location[1] === "1" && move(selectedObj.location)[1] < 1) {
+            //   return
+            // } else if (selectedObj.location[1] === "8" && move(selectedObj.location)[1] > 8) {
+            //   return
+            // }
+            // if (selectedObj.location+move % 8 === 7 || selectedObj.location+move % 8 === 0) {
+            //   isLastMove = true;
+            // }
+            console.log(move(selectedObj.location))
+            // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
+            if (document.getElementById(`${move(selectedObj.location)}`).childNodes.length > 0) {
+              // there is a piece there which can be captured
+              if (gameState.isWhiteTurn) {
+                console.log(document.getElementById(`${move(selectedObj.location)}`).classList)
+                console.log("^^^^^^ class list from potential attack div")
+                if (document.getElementById(`${move(selectedObj.location)}`).childNodes[0].classList[1] === "black") {
+                  document.getElementById(`${move(selectedObj.location)}`).addEventListener('click', capturePiece);
+                  console.log(document.getElementById(`${move(selectedObj.location)}`).childNodes.length)
+                  continueIteration = false;
+                  return
+                } else {
+                  // if it's white turn and there's a white piece at that location, then don't allow move or capture and end that set of moves with return
+                  continueIteration = false;
+                  return
+                }
+              } else {
+                if (document.getElementById(`${move(selectedObj.location)}`).childNodes[0].classList[1] === "white") {
+                  document.getElementById(`${move(selectedObj.location)}`).addEventListener('click', capturePiece);
+                  console.log(document.getElementById(`${move(selectedObj.location)}`).childNodes.length)
+                  continueIteration = false;
+                  return
+                } else {
+                  continueIteration = false;
+                  return
+                }
+              }
+            } else {
+              document.getElementById(`${move(selectedObj.location)}`).addEventListener('click', movePiece);
+            }
           }
         })
       })
