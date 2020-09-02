@@ -2,14 +2,21 @@
   display: grid;
   grid-template-columns: repeat(8, auto);
   grid-template-rows: repeat(8, auto);
-  width: calc(60px*8);
+  /* width: calc(60px*8); */
+  /* MIGHT BE GOOD TO HAVE DIFFERENT BREAK POINTS FOR DIFFERENT SIZES */
+  /* larger screens maybe do calc(57vw) */
+  width: calc(69vw);
   margin: 0 auto;
-  margin-top: calc((100vh - 60px*8)/2);
+  margin-top: calc((100vh - 60px*8)/4);
+  /* margin-bottom: calc((100vh - 60px*8)/4); */
 }
 
 .square {
-  width: 60px;
-  height: 60px;
+  /* width: 60px; */
+  /* height: 60px; */
+  width: 100%;
+  padding-bottom: 100%;
+  position: relative;
 }
 
 .white {
@@ -18,4 +25,9 @@
 
 .black {
   background-color: hsl(34, 69%, 30%);
+}
+
+img {
+  width: 100%;
+  position: absolute;
 }

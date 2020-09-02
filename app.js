@@ -1,10 +1,19 @@
 // NOTES FOR WHAT I WAS JUST WORKING ON:
 
+// Next TODOS
+
+// check and checkmate
+// castling
+// en passant
+
+
+
+
+
+
 // square id's are a8-h1
 // each chesspiece image tag also needs an id
   // pawn OBJECT & IMG tag id's are 109-124 (9-24 with 1 at beginning)
-
-
 
 
 
