@@ -101,7 +101,6 @@ console.log(gameboard)
 // LAST CHANGED GAMEBOARD TO BE STANDARD CONVENTION
 // object with keys a-h, each containing an array as a value which contains [1,2,3...8]
 
-//---------------- next TODO: update moves for each piece and then handle moves in GameState object accordingly ------------------------------------------
 
 
 
@@ -141,22 +140,13 @@ function Pawn(color, location, pieceId) {
   if (this.color === "black") {
     this.img_src = "./assets/Chess_pdt60.png";
     this.image.classList.add('blackPiece');
-    // instead of increasing by 8, a black pawn is now decreasing by 2 on the same letter (changes rank, stays on same file)
-    // OLD: this.moves = [8, 16];
-    // example starting location: e7, move to e6 or e5 if first turn
     this.moves = [(location)=>(parseInt(location, 18) - 1).toString(18), (location)=>(parseInt(location, 18) - 2).toString(18)];
-    // black attack inverted to 9 and 7 for simplified capturing logic located in GameState.secondPartTurn
-    // this.attack = [9, 7];
-    // what is value for a single diagonal?
-    // e to f is an increase by 18
-    // e to d is a decrease by 18
+    // black attack inverted relative to white attack for simplified capturing logic located in GameState.secondPartTurn
     this.attack = [(location)=>(parseInt(location, 18) - 1 + 18).toString(18), (location)=>(parseInt(location, 18) - 1 - 18).toString(18)];
   } else {
     this.img_src = "./assets/Chess_plt60.png";
     this.image.classList.add('whitePiece');
-    // this.moves = [-8, -16];
     this.moves = [(location)=>(parseInt(location, 18) + 1).toString(18), (location)=>(parseInt(location, 18) + 2).toString(18)];
-    // this.attack = [-7, -9];
     this.attack = [(location)=>(parseInt(location, 18) + 1 + 18).toString(18), (location)=>(parseInt(location, 18) + 1 - 18).toString(18)];
   }
   this.image.src = this.img_src;
@@ -239,13 +229,7 @@ function Rook(color, location, pieceId) {
       (location)=>(parseInt(location, 18) + (18*7)).toString(18)
     ]
   ];
-  // this.moves = [
-  //   [8, 16, 24, 32, 40, 48, 56],
-  //   [-8, -16, -24, -32, -40, -48, -56],
-  //   [1, 2, 3, 4, 5, 6, 7],
-  //   [-1, -2, -3, -4, -5, -6, -7]
-  // ];
-  this.attack = [/* capture is same as movement */];
+  // this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_rdt60.png";
@@ -306,10 +290,7 @@ function Knight(color, location, pieceId) {
       (location)=>(parseInt(location, 18) + 1 + (18 * 2)).toString(18)
     ],
   ]
-  // this.moves = [
-  //   -6, -15, -17, -10, 6, 10, 15, 17
-  // ];
-  this.attack = [/* capture is same as movement */];
+  // this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_ndt60.png";
@@ -383,13 +364,7 @@ function Bishop(color, location, pieceId) {
     (location)=>(parseInt(location, 18) + 7*(-1 + 18)).toString(18)
   ]
 ]
-  // this.moves = [
-  //   [9, 18, 27, 36, 45, 54, 63],
-  //   [-9, -18, -27, -36, -45, -54, -63],
-  //   [7, 14, 21, 28, 35, 42, 49],
-  //   [-7, -14, -21, -28, -35, -42, -49]
-  // ];
-  this.attack = [/* capture is same as movement */];
+  // this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_bdt60.png";
@@ -454,17 +429,7 @@ function King(color, location, pieceId) {
       (location)=>(parseInt(location, 18) + 1*(-1 + 18)).toString(18),
     ]
   ];
-  // this.moves = [
-  //   [8],
-  //   [-8],
-  //   [1],
-  //   [-1],
-  //   [9],
-  //   [-9],
-  //   [7],
-  //   [-7]
-  // ];
-  this.attack = [/* capture is same as movement */];
+  // this.attack = [/* capture is same as movement */];
   // cannot move into check
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -572,17 +537,7 @@ function Queen(color, location, pieceId) {
       (location)=>(parseInt(location, 18) + 7*(-1 + 18)).toString(18)
     ]
   ];
-  // this.moves = [
-  //   [8, 16, 24, 32, 40, 48, 56],
-  //   [-8, -16, -24, -32, -40, -48, -56],
-  //   [1, 2, 3, 4, 5, 6, 7],
-  //   [-1, -2, -3, -4, -5, -6, -7],
-  //   [9, 18, 27, 36, 45, 54, 63],
-  //   [-9, -18, -27, -36, -45, -54, -63],
-  //   [7, 14, 21, 28, 35, 42, 49],
-  //   [-7, -14, -21, -28, -35, -42, -49]
-  // ];
-  this.attack = [/* capture is same as movement */];
+  // this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
     this.img_src = "./assets/Chess_qdt60.png";
@@ -664,9 +619,8 @@ function GameState() {
     console.log(selectedObj)
     console.log("^^^^^^^^selectedObj")
     if (selectedObj.pieceType === "pawn") {
-    // this.moves = [(parseInt(this.location, 18) - 1).toString(18), (parseInt(this.location, 18) - 2).toString(18)];
       selectedObj.moves.forEach((move, index) => {
-        console.log(move)
+        // console.log(move)
         // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
         if (document.getElementById(`${move(selectedObj.location)}`).childNodes.length > 0) {
           // do nothing
@@ -681,6 +635,45 @@ function GameState() {
             }
           } else {
             document.getElementById(`${move(selectedObj.location)}`).addEventListener('click', movePiece);
+          }
+        }
+      })
+      // selectedObj is still a pawn
+      selectedObj.attack.forEach((attack, index) => {
+        console.log("HUR, below is ID of DOM node being grabbed")
+        // console.log(`${attack}`)
+        console.log(document.getElementById(`${attack(selectedObj.location)}`).childNodes)
+        console.log("^^^^^^ class list from potential attack div")
+        // console.log(document.getElementById(`${attack}`).childNodes[0])
+        // console.log(document.getElementById(`${attack}`).childNodes[0].classList)
+        // console.log(document.getElementById(`${attack}`).childNodes[0].classList === "blackPiece")
+        if (document.getElementById(`${attack(selectedObj.location)}`).childNodes.length > 0) {
+          // console.log(gameState.isWhiteTurn)
+          // console.log(document.getElementById(`${attack}`).childNodes[0].classList[0])
+          if (document.getElementById(`${attack(selectedObj.location)}`).childNodes[0].classList[0] === "blackPiece" && gameState.isWhiteTurn) {
+            if (selectedObj.location % 8 === 7) {
+              if (index === 1) {
+                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
+              }
+            } else if (selectedObj.location % 8 === 0) {
+              if (index === 0) {
+                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
+              }
+            } else {
+              document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
+            }
+          } else if ((document.getElementById(`${attack(selectedObj.location)}`).childNodes[0].classList[0] === "whitePiece" && gameState.isWhiteTurn === false)) {
+            if (selectedObj.location % 8 === 7) {
+              if (index === 1) {
+                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
+              }
+            } else if (selectedObj.location % 8 === 0) {
+              if (index === 0) {
+                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
+              }
+            } else {
+              document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
+            }
           }
         }
       })
@@ -706,24 +699,10 @@ function GameState() {
               // if queen is already on right side, do not let go through right side to far left side
               // if queen is not already on right side, let queen move to right side but not beyond
               // same for those two but for left side
-            // if (!gameboard.isPositionLegal(parseInt(move(selectedObj.location)))) {
-            //   return
-            // } else if (selectedObj.location[0] === "a" && parseInt(move(selectedObj.location)) < 181) {
-            //   return
-            // }
-            // // two pieces below might go away, need to look at move()'s up above in constructor objects
-            // if (selectedObj.location[1] === "1" && move(selectedObj.location)[1] < 1) {
-            //   return
-            // } else if (selectedObj.location[1] === "8" && move(selectedObj.location)[1] > 8) {
-            //   return
-            // }
-            // if (selectedObj.location+move % 8 === 7 || selectedObj.location+move % 8 === 0) {
-            //   isLastMove = true;
-            // }
             console.log(move(selectedObj.location))
             // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
             if (document.getElementById(`${move(selectedObj.location)}`).childNodes.length > 0) {
-              // there is a piece there which can be captured
+              // there is a piece on that square
               if (gameState.isWhiteTurn) {
                 console.log(document.getElementById(`${move(selectedObj.location)}`).classList)
                 console.log("^^^^^^ class list from potential attack div")
@@ -754,71 +733,8 @@ function GameState() {
           }
         })
       })
-    // } else if (selectedObj.pieceType === "knight") {
-    //   selectedObj.moves.forEach((move, index) => {
-    //     if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
-    //       // there is a piece there which can be captured
-    //       document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
-    //     } else {
-    //       document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
-    //     }
-    //   })
     }
     if (selectedObj.pieceType === "pawn") {
-      selectedObj.attack.forEach((attack, index) => {
-      // this.attack = (parseInt(this.location, 18) - 1 + 18).toString(18), (parseInt(this.location, 18) - 1 - 18).toString(18)
-        console.log("HUR, below is ID of DOM node being grabbed")
-        console.log(`${attack}`)
-        console.log(document.getElementById(`${attack(selectedObj.location)}`).childNodes)
-        console.log("^^^^^^ class list from potential attack div")
-        // console.log(document.getElementById(`${attack}`).childNodes[0])
-        // console.log(document.getElementById(`${attack}`).childNodes[0].classList)
-        // console.log(document.getElementById(`${attack}`).childNodes[0].classList === "blackPiece")
-        if (document.getElementById(`${attack(selectedObj.location)}`).childNodes.length > 0) {
-          // console.log(gameState.isWhiteTurn)
-          // console.log(document.getElementById(`${attack}`).childNodes[0].classList[0])
-          if (document.getElementById(`${attack(selectedObj.location)}`).childNodes[0].classList[0] === "blackPiece" && gameState.isWhiteTurn) {
-            if (selectedObj.location % 8 === 7) {
-              if (index === 1) {
-                // console.log('test1')
-                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-              }
-            } else if (selectedObj.location % 8 === 0) {
-              // console.log('test2')
-              if (index === 0) {
-                // console.log('test3')
-                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-              }
-            } else {
-              // console.log('test4')
-              // console.log("hittin' here")
-              document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-            }
-          } else if ((document.getElementById(`${attack(selectedObj.location)}`).childNodes[0].classList[0] === "whitePiece" && gameState.isWhiteTurn === false)) {
-            // console.log('test5')
-            if (selectedObj.location % 8 === 7) {
-              // console.log('test6')
-              if (index === 1) {
-                // console.log('test7')
-                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-              }
-            } else if (selectedObj.location % 8 === 0) {
-              // console.log('test8')
-              if (index === 0) {
-                // console.log('test9')
-                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-              }
-            } else {
-              // console.log('test10')
-              // console.log("hittin' here")
-              document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-            }
-          }
-          // console.log('test11')
-        } else {
-          // console.log('test12')
-        }
-      })
     }
     // first test simple scenario
     // let squares = document.querySelectorAll('.square');
