@@ -281,8 +281,34 @@ function Knight(color, location, pieceId) {
   this.location = location;
   this.id = pieceId;
   this.moves = [
-    -6, -15, -17, -10, 6, 10, 15, 17
-  ];
+    [
+      (location)=>(parseInt(location, 18) - 1 - (18 * 2)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) - 2 - 18).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) - 2 + 18).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) - 1 + (18 * 2)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1 - (18 * 2)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 2 - 18).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 2 + 18).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1 + (18 * 2)).toString(18)
+    ],
+  ]
+  // this.moves = [
+  //   -6, -15, -17, -10, 6, 10, 15, 17
+  // ];
   this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -320,11 +346,49 @@ function Bishop(color, location, pieceId) {
   this.location = location;
   this.id = pieceId;
   this.moves = [
-    [9, 18, 27, 36, 45, 54, 63],
-    [-9, -18, -27, -36, -45, -54, -63],
-    [7, 14, 21, 28, 35, 42, 49],
-    [-7, -14, -21, -28, -35, -42, -49]
-  ];
+  [
+    (location)=>(parseInt(location, 18) + 1*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 2*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 3*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 4*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 5*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 6*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 7*(1 + 18)).toString(18)
+  ],
+  [
+    (location)=>(parseInt(location, 18) - 1*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) - 2*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) - 3*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) - 4*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) - 5*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) - 6*(1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) - 7*(1 + 18)).toString(18)
+  ],
+  [
+    (location)=>(parseInt(location, 18) + 1*(1 - 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 2*(1 - 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 3*(1 - 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 4*(1 - 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 5*(1 - 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 6*(1 - 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 7*(1 - 18)).toString(18)
+  ],
+  [
+    (location)=>(parseInt(location, 18) + 1*(-1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 2*(-1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 3*(-1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 4*(-1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 5*(-1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 6*(-1 + 18)).toString(18),
+    (location)=>(parseInt(location, 18) + 7*(-1 + 18)).toString(18)
+  ]
+]
+  // this.moves = [
+  //   [9, 18, 27, 36, 45, 54, 63],
+  //   [-9, -18, -27, -36, -45, -54, -63],
+  //   [7, 14, 21, 28, 35, 42, 49],
+  //   [-7, -14, -21, -28, -35, -42, -49]
+  // ];
   this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -365,15 +429,41 @@ function King(color, location, pieceId) {
   // movement changes boolean value
   this.hasMoved = false;
   this.moves = [
-    [8],
-    [-8],
-    [1],
-    [-1],
-    [9],
-    [-9],
-    [7],
-    [-7]
+    [
+      (location)=>(parseInt(location, 18) - 1).toString(18),
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1).toString(18),
+    ],
+    [
+      (location)=>(parseInt(location, 18) - 18).toString(18),
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 18).toString(18),
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1*(1 + 18)).toString(18),
+    ],
+    [
+      (location)=>(parseInt(location, 18) - 1*(1 + 18)).toString(18),
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1*(1 - 18)).toString(18),
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1*(-1 + 18)).toString(18),
+    ]
   ];
+  // this.moves = [
+  //   [8],
+  //   [-8],
+  //   [1],
+  //   [-1],
+  //   [9],
+  //   [-9],
+  //   [7],
+  //   [-7]
+  // ];
   this.attack = [/* capture is same as movement */];
   // cannot move into check
   this.image = document.createElement('img');
@@ -409,15 +499,89 @@ function Queen(color, location, pieceId) {
   this.location = location;
   this.id = pieceId;
   this.moves = [
-    [8, 16, 24, 32, 40, 48, 56],
-    [-8, -16, -24, -32, -40, -48, -56],
-    [1, 2, 3, 4, 5, 6, 7],
-    [-1, -2, -3, -4, -5, -6, -7],
-    [9, 18, 27, 36, 45, 54, 63],
-    [-9, -18, -27, -36, -45, -54, -63],
-    [7, 14, 21, 28, 35, 42, 49],
-    [-7, -14, -21, -28, -35, -42, -49]
+    [
+      (location)=>(parseInt(location, 18) - 1).toString(18),
+      (location)=>(parseInt(location, 18) - 2).toString(18),
+      (location)=>(parseInt(location, 18) - 3).toString(18),
+      (location)=>(parseInt(location, 18) - 4).toString(18),
+      (location)=>(parseInt(location, 18) - 5).toString(18),
+      (location)=>(parseInt(location, 18) - 6).toString(18),
+      (location)=>(parseInt(location, 18) - 7).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1).toString(18),
+      (location)=>(parseInt(location, 18) + 2).toString(18),
+      (location)=>(parseInt(location, 18) + 3).toString(18),
+      (location)=>(parseInt(location, 18) + 4).toString(18),
+      (location)=>(parseInt(location, 18) + 5).toString(18),
+      (location)=>(parseInt(location, 18) + 6).toString(18),
+      (location)=>(parseInt(location, 18) + 7).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) - 18).toString(18),
+      (location)=>(parseInt(location, 18) - (18*2)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*3)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*4)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*5)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*6)).toString(18),
+      (location)=>(parseInt(location, 18) - (18*7)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 18).toString(18),
+      (location)=>(parseInt(location, 18) + (18*2)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*3)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*4)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*5)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*6)).toString(18),
+      (location)=>(parseInt(location, 18) + (18*7)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 2*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 3*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 4*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 5*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 6*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 7*(1 + 18)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) - 1*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) - 2*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) - 3*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) - 4*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) - 5*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) - 6*(1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) - 7*(1 + 18)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1*(1 - 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 2*(1 - 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 3*(1 - 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 4*(1 - 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 5*(1 - 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 6*(1 - 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 7*(1 - 18)).toString(18)
+    ],
+    [
+      (location)=>(parseInt(location, 18) + 1*(-1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 2*(-1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 3*(-1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 4*(-1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 5*(-1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 6*(-1 + 18)).toString(18),
+      (location)=>(parseInt(location, 18) + 7*(-1 + 18)).toString(18)
+    ]
   ];
+  // this.moves = [
+  //   [8, 16, 24, 32, 40, 48, 56],
+  //   [-8, -16, -24, -32, -40, -48, -56],
+  //   [1, 2, 3, 4, 5, 6, 7],
+  //   [-1, -2, -3, -4, -5, -6, -7],
+  //   [9, 18, 27, 36, 45, 54, 63],
+  //   [-9, -18, -27, -36, -45, -54, -63],
+  //   [7, 14, 21, 28, 35, 42, 49],
+  //   [-7, -14, -21, -28, -35, -42, -49]
+  // ];
   this.attack = [/* capture is same as movement */];
   this.image = document.createElement('img');
   if (this.color === "black") {
@@ -520,7 +684,7 @@ function GameState() {
           }
         }
       })
-    } else if (selectedObj.pieceType === "queen" || "king" || "bishop" || "rook") {
+    } else if (selectedObj.pieceType === "queen" || "king" || "bishop" || "rook" || "knight") {
       selectedObj.moves.forEach((moveArray, index) => {
         let continueIteration = true;
         moveArray.forEach((move, index) => {
@@ -563,7 +727,7 @@ function GameState() {
               if (gameState.isWhiteTurn) {
                 console.log(document.getElementById(`${move(selectedObj.location)}`).classList)
                 console.log("^^^^^^ class list from potential attack div")
-                if (document.getElementById(`${move(selectedObj.location)}`).childNodes[0].classList[1] === "black") {
+                if (document.getElementById(`${move(selectedObj.location)}`).childNodes[0].classList[0] === "blackPiece") {
                   document.getElementById(`${move(selectedObj.location)}`).addEventListener('click', capturePiece);
                   console.log(document.getElementById(`${move(selectedObj.location)}`).childNodes.length)
                   continueIteration = false;
@@ -574,7 +738,7 @@ function GameState() {
                   return
                 }
               } else {
-                if (document.getElementById(`${move(selectedObj.location)}`).childNodes[0].classList[1] === "white") {
+                if (document.getElementById(`${move(selectedObj.location)}`).childNodes[0].classList[0] === "whitePiece") {
                   document.getElementById(`${move(selectedObj.location)}`).addEventListener('click', capturePiece);
                   console.log(document.getElementById(`${move(selectedObj.location)}`).childNodes.length)
                   continueIteration = false;
@@ -590,15 +754,15 @@ function GameState() {
           }
         })
       })
-    } else if (selectedObj.pieceType === "knight") {
-      selectedObj.moves.forEach((move, index) => {
-        if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
-          // there is a piece there which can be captured
-          document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
-        } else {
-          document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
-        }
-      })
+    // } else if (selectedObj.pieceType === "knight") {
+    //   selectedObj.moves.forEach((move, index) => {
+    //     if (document.getElementById(`${selectedObj.location+move}`).childNodes.length > 0) {
+    //       // there is a piece there which can be captured
+    //       document.getElementById(`${selectedObj.location+move}`).addEventListener('click', capturePiece);
+    //     } else {
+    //       document.getElementById(`${selectedObj.location+move}`).addEventListener('click', movePiece);
+    //     }
+    //   })
     }
     if (selectedObj.pieceType === "pawn") {
       selectedObj.attack.forEach((attack, index) => {
