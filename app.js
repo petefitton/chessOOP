@@ -743,7 +743,17 @@ function GameState() {
         })
       })
     }
-    if (selectedObj.pieceType === "pawn") {
+    if (selectedObj.pieceType === "king") {
+      if (selectedObj.hasMoved === false) {
+        // potential castling scenario
+        // movement for castling must move both pieces in movePiece() below
+        // two castle potentials - kingside and queenside
+        // where to handle what logic?
+        // logic to handle: check if kingside and queenside rooks have moved or not
+        // check to see if there are pieces between king and each rook
+        // check for King in check (cannot be IN check, cannot move THROUGH check, cannot move INTO check)
+        // will need to write check logic first since it hinges on that so much
+      }
     }
     // first test simple scenario
     // let squares = document.querySelectorAll('.square');
@@ -787,6 +797,11 @@ function GameState() {
         pieceObject.moves.pop();
       }
     }
+    if (pieceObject.pieceType === "king" || "rook") {
+      if (pieceObject.hasMoved === false) {
+        pieceObject.hasMoved = true;
+      }
+    }
     gameState.isWhiteTurn = !gameState.isWhiteTurn;
     return gameState.firstPartTurn();
   }
@@ -820,6 +835,11 @@ function GameState() {
       if (pieceObject.hasMoved === false) {
         pieceObject.hasMoved = true;
         pieceObject.moves.pop();
+      }
+    }
+    if (pieceObject.pieceType === "king" || "rook") {
+      if (pieceObject.hasMoved === false) {
+        pieceObject.hasMoved = true;
       }
     }
     gameState.isWhiteTurn = !gameState.isWhiteTurn;
