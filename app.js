@@ -594,14 +594,20 @@ console.log(piecesArray)
 function GameState() {
   this.isWhiteTurn = true;
   this.selectedPieceImg = null;
+  this.checkingPieces = [];
+  this.kingIsChecked = false;
 
   this.firstPartTurn = function() {
-    if (gameState.isWhiteTurn) { 
+    if (gameState.isWhiteTurn) {
+      gameState.kingCheck();
+      // based off of kingCheck(), should not add querySelector to every piece
+      // kingCheck() should return an array of playablePieces for current player
       let playablePieces = document.querySelectorAll('.whitePiece');
       playablePieces.forEach(piece => {
         piece.addEventListener('click', selectPiece);
       })
     } else {
+      gameState.kingCheck();
       let playablePieces = document.querySelectorAll('.blackPiece');
       playablePieces.forEach(piece => {
         piece.addEventListener('click', selectPiece);
@@ -825,7 +831,7 @@ function GameState() {
       square.removeEventListener('click', capturePiece);
     })
     let capturedImg = document.getElementById(e.target.id);
-    let capturedObject = findCapturedObj(capturedImg);
+    let capturedObject = findObjFromImg(capturedImg);
     capturedImg.remove();
     capturedPieces.push(capturedObject)
     let pieceObject = findObjFromGameStateSelectedPieceImg();
@@ -846,7 +852,7 @@ function GameState() {
     return gameState.firstPartTurn();
   }
 
-  function findCapturedObj(imgElem) {
+  function findObjFromImg(imgElem) {
     return function(imgElem) {
       for (i=0; i<piecesArray.length; i++) {
         if (piecesArray[i].id == imgElem.id) {
@@ -855,6 +861,76 @@ function GameState() {
       }
     }(imgElem)
   }
+
+  this.kingCheck = function() {
+    // check current player's king
+    let opponentPiecesImages;
+    let currentKing;
+    if (gameState.isWhiteTurn) {
+      console.log("white's turn from kingCheck func");
+      // if white's king is in check, then return an array of pieces that can move to get king out of check
+      // else return every playable piece for white
+      opponentPiecesImages = document.querySelectorAll('.blackPiece');
+      // find current player's king and assign to currentKing
+      piecesArray.forEach(piece => {
+        if (piece.id === 129) {
+          // piece with id of 129 is white king
+          currentKing = piece;
+          return
+        }
+      });
+    } else {
+      console.log("black's turn from kingCheck func");
+      opponentPiecesImages = document.querySelectorAll('.whitePiece');
+      piecesArray.forEach(piece => {
+        if (piece.id === 105) {
+          // piece with id of 105 is black king
+          currentKing = piece;
+          return
+        }
+      });
+    }
+    opponentPiecesImages.forEach(pieceImg => {
+      // check if potential moves put king in check
+      // for second part turn typically, I want to add an event listener for a single piece on move and attack spaces
+      // here I want to check multiple pieces and if any piece has current player's king in check, then I want to add that piece to gameState.checkingPieces
+      // continue iterating over all opponentPieces and adding as appropriate
+      let opponentPiece = findObjFromImg(pieceImg);
+      if (opponentPiece.pieceType === "pawn") {
+        opponentPiece.attack.forEach((attack, index) => {
+          if (attack(opponentPiece.location) === currentKing.location) {
+            // if true, then king is in check from this pawn
+            gameState.checkingPieces.push(opponentPiece);
+          }
+        })
+      } else if (opponentPiece.pieceType === "queen" || "bishop" || "rook" || "knight") {
+        // don't include king in the list above because king's can't get within checking distance
+        opponentPiece.moves.forEach((moveArray, index) => {
+          let continueIteration = true;
+          moveArray.forEach((move, index) => {
+            if (continueIteration) {
+              if (!gameboard.isPositionLegal(parseInt(move(opponentPiece.location), 18))) {
+                continueIteration = false;
+                return
+              }
+              if (move(opponentPiece.location) === currentKing.location) {
+                // if true, then king is in check from this piece
+                gameState.checkingPieces.push(opponentPiece);
+              }
+              if (document.getElementById(`${move(opponentPiece.location)}`).childNodes.length > 0) {
+                // there is a piece on that square
+                continueIteration = false;
+                return
+              }
+            }
+          })
+        })
+      }
+    })
+    // kingCheck() should return an array of playablePieces for current player
+    // if gameState.checkingPieces array has a length > 0, return only moveable pieces for player
+    // else return all current player's pieces
+  }
 }
 
 let gameState = new GameState();
@@ -862,3 +938,37 @@ let gameState = new GameState();
 
 
 gameState.firstPartTurn();
+
+//TODO prevent adding eventListener for a move/attack that would put one's own king in check
+
+
+// NOTES for check
+// when turn begins, see if current player's king is in check
+  // it's not possible for both kings to be in check, otherwise it would be a checkmate
+// if move/attack would put player's king in check, prevent that move (or attack)
+// check can be cleared 3 way:
+  // king can move out of check
+  // piece can move between king and checking piece (except for a checking knight)
+  // checking piece can be captured
+// above two points mean two things:
+  // when a player's king is in check, player is required to get out of check
+  // and cannot be put into check as a result of action
+
+
+// it may make sense to remember checking piece(s)
+// theoretically two pieces could be checking at the same time (but not three)
+// checking piece(s) can be assigned into an array: gameState.checkingPieces
+// declare that array
+// add pieces at beginning of turn while looking to see if current player's king is in check
+// empty array at end of player's turn
+
+
+// checkmate
+// when looking for current player's king in check:
+  // if king is in check
+  // iterate over current player's pieces
+  // once a piece is found which can move and prevent check and will not create a new check on one's own king
+  // then iteration can stop and turn can continue
+  // if none of current player's pieces can move to get king out of check (or without creating a new check on one's own king)
+    // then checkmate has occurred
+// requires iterating over both player pieces arrays
