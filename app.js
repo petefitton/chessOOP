@@ -594,11 +594,12 @@ console.log(piecesArray)
 function GameState() {
   this.isWhiteTurn = true;
   this.selectedPieceImg = null;
-  this.checkingPieces = [];
+  // this.checkingPieces = [];
   this.kingIsChecked = false;
 
   this.firstPartTurn = function() {
     let playablePieces;
+    let currentKing;
     // based off of isKingInCheck(), should not add querySelector to every piece
     if (gameState.isKingInCheck(piecesArray)) {
       // there are checking pieces
@@ -606,11 +607,30 @@ function GameState() {
       // three possible ways to get king out of check
       // 1: move king
       if (gameState.canKingMove()) {
-        let currentKing = gameState.currentKing(piecesArray);
+        currentKing = gameState.currentKing(piecesArray);
         playablePieces.push(currentKing);
       }
       // ^^^^^ returns true or false
       // 2: move piece between king and checking piece [not if two pieces are checking and doesn't work for knights]
+        // find which piece(s) is/are checking currentKing
+        // gameState.checkingPieces() returns array of checking pieces
+        let checkingPieces = gameState.checkingPieces(currentKing);
+        if (checkingPieces.length > 1) {
+          // skip over 2:
+        } else {
+          if (checkingPieces[0].pieceType === "knight") {
+            // skip
+          } else {
+            // don't skip 2:
+            // check to see what pieces could potentially block any of the checking pieces (not include capturing)
+            // else moving a blocking piece may be possible
+              // check and see if which pieces can move between king and checking piece(singular)
+              // push any piece that could block the check into the playablePieces array
+            // someMethod should return any playable piece that would block the single checking piece
+            let tempPlayablePieces = gameState.findPossibleBlockingPieces();
+            tempPlayablePieces.forEach(piece => playablePieces.push(piece));
+          }
+        }
       // 3: capture checking piece [doesn't work if two pieces are checking]
     } else {
       if (gameState.isWhiteTurn) {
@@ -671,33 +691,15 @@ function GameState() {
         // console.log(document.getElementById(`${attack}`).childNodes[0])
         // console.log(document.getElementById(`${attack}`).childNodes[0].classList)
         // console.log(document.getElementById(`${attack}`).childNodes[0].classList === "blackPiece")
-        if (document.getElementById(`${attack(selectedObj.location)}`).childNodes.length > 0) {
+        if (!gameboard.isPositionLegal(parseInt(attack(selectedObj.location), 18))) {
+          // do nothing; illegal attack location
+        } else if (document.getElementById(`${attack(selectedObj.location)}`).childNodes.length > 0) {
           // console.log(gameState.isWhiteTurn)
           // console.log(document.getElementById(`${attack}`).childNodes[0].classList[0])
           if (document.getElementById(`${attack(selectedObj.location)}`).childNodes[0].classList[0] === "blackPiece" && gameState.isWhiteTurn) {
-            if (selectedObj.location % 8 === 7) {
-              if (index === 1) {
-                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-              }
-            } else if (selectedObj.location % 8 === 0) {
-              if (index === 0) {
-                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-              }
-            } else {
-              document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-            }
-          } else if ((document.getElementById(`${attack(selectedObj.location)}`).childNodes[0].classList[0] === "whitePiece" && gameState.isWhiteTurn === false)) {
-            if (selectedObj.location % 8 === 7) {
-              if (index === 1) {
-                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-              }
-            } else if (selectedObj.location % 8 === 0) {
-              if (index === 0) {
-                document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-              }
-            } else {
-              document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
-            }
+            document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
+          } else if (document.getElementById(`${attack(selectedObj.location)}`).childNodes[0].classList[0] === "whitePiece" && !gameState.isWhiteTurn) {
+            document.getElementById(`${attack(selectedObj.location)}`).addEventListener('click', capturePiece);
           }
         }
       })
@@ -947,9 +949,7 @@ function GameState() {
 
   this.isKingInCheck = function(piecesArray) {
     // should return true or false if king is in check or not
-    // let opponentPiecesImages;
     let opponentObjs;
-      opponentPiecesImages = document.querySelectorAll('.whitePiece');
     let currentKing = gameState.currentKing(piecesArray);
     let isChecked = false;
     if (gameState.isWhiteTurn) {
@@ -1093,6 +1093,258 @@ function GameState() {
       });
     }
     return currentKing
+  }
+
+  // this.checkingPieces = function() {
+  //   // should return an array of checking pieces (either one or two pieces)
+  //   let out = [];
+  //   // iterate over current player's pieces
+  //   // iterate over the moveArrays for each piece (handle pawn logic separately)
+  //   let currentObjs;
+  //   if (gameState.isWhiteTurn) {
+  //     currentObjs = piecesArray.filter(piece => {
+  //       if (piece.color === "white") {
+  //         return piece
+  //       }
+  //     });
+  //   } else {
+  //     currentObjs = piecesArray.filter(piece => {
+  //       if (piece.color === "black") {
+  //         return piece
+  //       }
+  //     });
+  //   }
+  //   currentObjs.forEach(curentPlayerPiece => {
+  //     if (curentPlayerPiece.pieceType === "pawn") {
+  //       curentPlayerPiece.moves.forEach((move, index) => {
+  //         // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
+  //         if (document.getElementById(`${move(curentPlayerPiece.location)}`).childNodes.length > 0) {
+  //           // do nothing
+  //         } else {
+  //           if (index > 0) {
+  //             // check to make sure nothing occupies space directly in front of pawn if the pawn is moving two forward squares on first turn
+  //             if (document.getElementById(`${curentPlayerPiece.moves[0](curentPlayerPiece.location)}`).childNodes.length > 0) {
+  //               // do nothing
+  //             } else {
+  //               // if move would block king from being in check, then add event listener for movePiece on that piece's image tag
+  //               let tempPiecesArray = piecesArray;
+  //               // need to change location of king in tempPiecesArray
+  //               tempPiecesArray.forEach(piece => {
+  //                 if (piece.location === currentPlayerPiece.location) {
+  //                   piece.location = move(currentPlayerPiece.location)
+  //                 }
+  //               })
+  //               if (gameState.isKingInCheck(tempPiecesArray)) {
+  //                 // king would move into check, not a valid move
+  //               } else {
+  //                 out.push(currentPlayerPiece);
+  //               }
+  //             }
+  //           } else {
+  //             let tempPiecesArray = piecesArray;
+  //             // need to change location of king in tempPiecesArray
+  //             tempPiecesArray.forEach(piece => {
+  //               if (piece.location === currentPlayerPiece.location) {
+  //                 piece.location = move(currentPlayerPiece.location)
+  //               }
+  //             })
+  //             if (gameState.isKingInCheck(tempPiecesArray)) {
+  //               // king would move into check, not a valid move
+  //             } else {
+  //               out.push(currentPlayerPiece);
+  //             }
+  //           }
+  //         }
+  //       })
+  //       // curentPlayerPiece is still a pawn
+  //       curentPlayerPiece.attack.forEach((attack, index) => {
+  //         if (!gameboard.isPositionLegal(parseInt(attack(selectedObj.location), 18))) {
+  //           // do nothing; illegal attack location
+  //         } else if (document.getElementById(`${attack(selectedObj.location)}`).childNodes.length > 0) {
+  //           if (document.getElementById(`${attack(curentPlayerPiece.location)}`).childNodes[0].classList[0] === "blackPiece" && gameState.isWhiteTurn) {
+  //             // check to see if that movement would remove king's check
+  //             let tempPiecesArray = piecesArray;
+  //             // need to remove potentially captured piece from tempPiecesArray
+  //             let tempImgId = document.getElementById(`${attack(curentPlayerPiece.location)}`).childNodes[0].id
+  //             tempPiecesArray = tempPiecesArray.filter(piece => {
+  //               return piece.id !== tempImgId
+  //             })
+  //             tempPiecesArray.forEach(piece => {
+  //               if (piece.location === currentPlayerPiece.location) {
+  //                 piece.location = move(currentPlayerPiece.location)
+  //               }
+  //             })
+  //             if (gameState.isKingInCheck(tempPiecesArray)) {
+  //               // king would move into check, not a valid move
+  //             } else {
+  //               out.push(currentPlayerPiece);
+  //             }
+  //           } else if (document.getElementById(`${attack(selectedObj.location)}`).childNodes[0].classList[0] === "whitePiece" && !gameState.isWhiteTurn) {
+  //             let tempPiecesArray = piecesArray;
+  //             // need to remove potentially captured piece from tempPiecesArray
+  //             let tempImgId = document.getElementById(`${attack(curentPlayerPiece.location)}`).childNodes[0].id
+  //             tempPiecesArray = tempPiecesArray.filter(piece => {
+  //               return piece.id !== tempImgId
+  //             })
+  //             tempPiecesArray.forEach(piece => {
+  //               if (piece.location === currentPlayerPiece.location) {
+  //                 piece.location = move(currentPlayerPiece.location)
+  //               }
+  //             })
+  //             if (gameState.isKingInCheck(tempPiecesArray)) {
+  //               // king would move into check, not a valid move
+  //             } else {
+  //               out.push(currentPlayerPiece);
+  //             }
+  //           }
+  //         }
+  //       })
+  //     } else if (curentPlayerPiece.pieceType === "queen" || "bishop" || "rook" || "knight") {
+  //       // iterate over current player's pieces to see if a move would make king NOT be in check, if that's true push that piece into the out array
+  //       let continueNestedIteration = true;
+  //       while (continueNestedIteration) {
+  //         curentPlayerPiece.moves.forEach((moveArray, index) => {
+  //           let continueIteration = true;
+  //           moveArray.forEach((move, index) => {
+  //             if (continueIteration) {
+  //               if (!gameboard.isPositionLegal(parseInt(move(curentPlayerPiece.location), 18))) {
+  //                 continueIteration = false;
+  //                 return
+  //               }
+  //               // if location of move already has a piece (an Img tag child), then pass that move; else, addEventListener
+  //               if (document.getElementById(`${move(curentPlayerPiece.location)}`).childNodes.length > 0) {
+  //                 // there is a piece on that square
+  //                 if (gameState.isWhiteTurn) {
+  //                   if (document.getElementById(`${move(curentPlayerPiece.location)}`).childNodes[0].classList[0] === "blackPiece") {
+  //                     let tempPiecesArray = piecesArray;
+  //                     // need to remove potentially captured piece from tempPiecesArray
+  //                     let tempImgId = document.getElementById(`${move(curentPlayerPiece.location)}`).childNodes[0].id
+  //                     tempPiecesArray = tempPiecesArray.filter(piece => {
+  //                       return piece.id !== tempImgId
+  //                     })
+  //                     // update location of potentially moving piece
+  //                     tempPiecesArray.forEach(piece => {
+  //                       if (piece.location === currentPlayerPiece.location) {
+  //                         piece.location = move(currentPlayerPiece.location)
+  //                       }
+  //                     })
+  //                     if (gameState.isKingInCheck(tempPiecesArray)) {
+  //                       // king would move into check, not a valid move
+  //                     } else {
+  //                       out.push(currentPlayerPiece);
+  //                       continueNestedIteration = false;
+  //                     }
+  //                     continueIteration = false;
+  //                     return
+  //                   } else {
+  //                     // if it's white turn and there's a white piece at that location, then don't allow move or capture and end that set of moves with return
+  //                     continueIteration = false;
+  //                     return
+  //                   }
+  //                 } else {
+  //                   if (document.getElementById(`${move(curentPlayerPiece.location)}`).childNodes[0].classList[0] === "whitePiece") {
+  //                     let tempPiecesArray = piecesArray;
+  //                     // need to remove potentially captured piece from tempPiecesArray
+  //                     let tempImgId = document.getElementById(`${move(curentPlayerPiece.location)}`).childNodes[0].id
+  //                     tempPiecesArray = tempPiecesArray.filter(piece => {
+  //                       return piece.id !== tempImgId
+  //                     })
+  //                     // update location of potentially moving piece
+  //                     tempPiecesArray.forEach(piece => {
+  //                       if (piece.location === currentPlayerPiece.location) {
+  //                         piece.location = move(currentPlayerPiece.location)
+  //                       }
+  //                     })
+  //                     if (gameState.isKingInCheck(tempPiecesArray)) {
+  //                       // king would move into check, not a valid move
+  //                     } else {
+  //                       out.push(currentPlayerPiece);
+  //                       continueNestedIteration = false;
+  //                     }
+  //                     continueIteration = false;
+  //                     return
+  //                   } else {
+  //                     continueIteration = false;
+  //                     return
+  //                   }
+  //                 }
+  //               } else {
+  //                 let tempPiecesArray = piecesArray;
+  //                 tempPiecesArray.forEach(piece => {
+  //                   if (piece.location === currentPlayerPiece.location) {
+  //                     piece.location = move(currentPlayerPiece.location)
+  //                   }
+  //                 })
+  //                 if (gameState.isKingInCheck(tempPiecesArray)) {
+  //                   // king would move into check, not a valid move
+  //                 } else {
+  //                   out.push(currentPlayerPiece);
+  //                   continueNestedIteration = false;
+  //                 }
+  //               }
+  //             }
+  //           })
+  //         })
+  //       }
+  //     }
+  //   })
+  //   return out
+  // }
+  this.checkingPieces = function(currentKing) {
+    // should return an array of checking pieces (either one or two pieces)
+    let out = [];
+    // iterate over current player's pieces
+    // iterate over the moveArrays for each piece (handle pawn logic separately)
+    let opponentObjs;
+    if (gameState.isWhiteTurn) {
+      opponentObjs = piecesArray.filter(piece => {
+        if (piece.color === "black") {
+          return piece
+        }
+      });
+    } else {
+      opponentObjs = piecesArray.filter(piece => {
+        if (piece.color === "white") {
+          return piece
+        }
+      });
+    }
+    opponentObjs.forEach(opposingPlayerPiece => {
+      if (opposingPlayerPiece.pieceType === "pawn") {
+        opposingPlayerPiece.attack.forEach((attack, index) => {
+          if (attack(opposingPlayerPiece.location) === currentKing.location) {
+            // checking piece
+            out.push(opposingPlayerPiece);
+          }
+        })
+      } else if (opposingPlayerPiece.pieceType === "queen" || "bishop" || "rook" || "knight") {
+        // iterate over current player's pieces to see if a move would make king NOT be in check, if that's true push that piece into the out array
+        opposingPlayerPiece.moves.forEach((moveArray, index) => {
+          let continueIteration = true;
+          moveArray.forEach((move, index) => {
+            if (continueIteration) {
+              if (!gameboard.isPositionLegal(parseInt(move(opposingPlayerPiece.location), 18))) {
+                continueIteration = false;
+                return
+              }
+              if (move(opposingPlayerPiece.location) === currentKing.location) {
+                // checking piece
+                out.push(opposingPlayerPiece);
+              }
+              // if location of move already has a piece (an Img tag child), then stop iterating over that moveArray
+              if (document.getElementById(`${move(opposingPlayerPiece.location)}`).childNodes.length > 0) {
+                continueIteration = false;
+              }
+            }
+          })
+        })
+      }
+    })
+    return out
+  }
+
+  this.findPossibleBlockingPieces = function() {
+    // function that returns an array of pieces that could move to block a single checking piece to make king no longer be in check
   }
 }
 
