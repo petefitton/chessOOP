@@ -627,7 +627,7 @@ function GameState() {
               // check and see if which pieces can move between king and checking piece(singular)
               // push any piece that could block the check into the playablePieces array
             // someMethod should return any playable piece that would block the single checking piece
-            let tempPlayablePieces = gameState.findPossibleBlockingPieces();
+            let tempPlayablePieces = gameState.findPossibleBlockingPieces(checkingPieces[0], currentKing);
             tempPlayablePieces.forEach(piece => playablePieces.push(piece));
           }
         }
@@ -1343,8 +1343,140 @@ function GameState() {
     return out
   }
 
-  this.findPossibleBlockingPieces = function() {
+  this.findPossibleBlockingPieces = function(checkingPiece, currentKing) {
+    let out = [];
     // function that returns an array of pieces that could move to block a single checking piece to make king no longer be in check
+    // I have access to checking piece
+    // currentKing.location
+    // find what line the check is happening on (knights not included in this, so restricted to ranks, files, and diagonals)
+    // 8 ranks
+    // 8 files
+    // 7 \ diagonals
+    // 7 / diagonals
+    // blockingSquareLocations is base 10 locations rather than base 18
+    let blockingSquareLocations = [];
+    function locationBySizeFunc() {
+      let smallerLocation;
+      let largerLocation;
+      console.log(checkingPiece.location);
+      console.log(currentKing.location);
+      if (parseInt(checkingPiece.location, 18) > parseInt(currentKing.location, 18)) {
+        smallerLocation = parseInt(currentKing.location, 18);
+        largerLocation = parseInt(checkingPiece.location, 18);
+      } else {
+        smallerLocation = parseInt(checkingPiece.location, 18);
+        largerLocation = parseInt(currentKing.location, 18);
+      }
+      return [smallerLocation, largerLocation]
+    }
+    function increaseByFactor(factor) {
+      let tempLoc = (smallerLocation + factor);
+      while (tempLoc !== largerLocation) {
+        blockingSquareLocations.push(tempLoc);
+        tempLoc += factor;
+        console.log("hope I don't get looping")
+        console.log(smallerLocation);
+        console.log(largerLocation);
+        console.log(tempLoc);
+        console.log(blockingSquareLocations);
+      }
+    }
+    let [smallerLocation, largerLocation] = locationBySizeFunc();
+    if (checkingPiece.location[1] === currentKing.location[1]) {
+      // ex: '1' === '1'
+      // find all blocking square locations
+      increaseByFactor(18);
+    } else if (checkingPiece.location[0] === currentKing.location[0]) {
+      // ex: 'a' === 'a'
+      increaseByFactor(1);
+    } else if ((parseInt(checkingPiece.location, 18) - parseInt(currentKing.location, 18)) % 17 === 0) {
+      // if the difference between the two locations (in base 10) modulus 17 === 0, it's \ diagonal
+      increaseByFactor(17);
+    } else if ((parseInt(checkingPiece.location, 18) - parseInt(currentKing.location, 18)) % 19 === 0) {
+      // if the difference between the two locations (in base 10) modulus 19 === 0, it's / diagonal
+      increaseByFactor(19);
+    }
+    // iterate over all of current player's pieces to see if any piece can move to any of the locations between checkingPiece and currentKing
+    console.log(blockingSquareLocations); // in base 10
+    // make sure that piece moving wouldn't put king in check
+    let currentPlayerPieces;
+    if (gameState.isWhiteTurn) {
+      currentPlayerPieces = piecesArray.filter(piece => piece.color === "white" && piece.pieceType !== "king")
+    } else {
+      currentPlayerPieces = piecesArray.filter(piece => piece.color === "black" && piece.pieceType !== "king")
+    }
+    // first: see if that piece and the single checking piece were not on the board if the king would be in check
+    currentPlayerPieces.forEach(currentPlayerPiece => {
+      let tempPiecesArray = piecesArray;
+      // need to remove currentPlayerPiece & checkingPiece from tempPiecesArray
+      tempPiecesArray = tempPiecesArray.filter(piece => {
+        return piece.id !== currentPlayerPiece.id
+      })
+      tempPiecesArray = tempPiecesArray.filter(piece => {
+        return piece.id !== checkingPiece.id
+      })
+      // update location of potentially moving piece
+      // tempPiecesArray.forEach(piece => {
+      //   if (piece.location === currentPlayerPiece.location) {
+      //     piece.location = move(currentPlayerPiece.location)
+      //   }
+      // })
+      if (gameState.isKingInCheck(tempPiecesArray)) {
+        // king would be in check if currentPlayerPiece moves
+      } else {
+        // passes first point
+        // if first point passes, then second: see if that piece can move to one of the blockingSquareLocations in that array
+        // if second is true, push that piece into the out array
+        if (currentPlayerPiece.pieceType === "pawn") {
+          // pawn moves (attacks won't count because blocking square locations must be empty)
+          let continueIteration = true;
+          while (continueIteration) {
+            currentPlayerPiece.moves.forEach((move, index) => {
+              if (document.getElementById(`${move(selectedObj.location)}`).childNodes.length > 0) {
+                continueIteration = false;
+              } else {
+                blockingSquareLocations.forEach(location => {
+                  if (move(currentPlayerPiece.location) === location) {
+                    // piece could move to possible blocking square location
+                    out.push(currentPlayerPiece);
+                  }
+                })
+              }
+            })
+          }
+        } else {
+          // iterate over array and nested array of moves to see if any possible moves would land on any of the possible blockingSquareLocations
+          let continueIteration = true;
+          while (continueIteration) {
+            currentPlayerPiece.moves.forEach((moveArray, index) => {
+              let nestedContinueIteration = true;
+              moveArray.forEach((move, index) => {
+                while (nestedContinueIteration) {
+                  if (!gameboard.isPositionLegal(parseInt(move(currentPlayerPiece.location), 18))) {
+                    nestedContinueIteration = false;
+                  }
+                  if (document.getElementById(`${move(currentPlayerPiece.location)}`).childNodes.length > 0) {
+                    // there is a piece on that square
+                    nestedContinueIteration = false;
+                  } else {
+                    blockingSquareLocations.forEach(location => {
+                      if (move(currentPlayerPiece.location) === location) {
+                        // piece could move to possible blocking square location
+                        out.push(currentPlayerPiece);
+                        continueIteration = false;
+                      }
+                    })
+                  }
+                }
+              })
+            })
+          }
+        }
+      }
+    })
+    console.log(out);
+    console.log("^^^^^^^^ out😇");
+    return out
   }
 }
 
