@@ -184,7 +184,8 @@ let whitePawnOne = new Pawn("white", "a2", 117);
 let whitePawnTwo = new Pawn("white", "b2", 118);
 let whitePawnThree = new Pawn("white", "c2", 119);
 let whitePawnFour = new Pawn("white", "d2", 120);
-let whitePawnFive = new Pawn("white", "e2", 121);
+// let whitePawnFive = new Pawn("white", "e2", 121);
+let whitePawnFive = new Pawn("white", "d3", 121);
 let whitePawnSix = new Pawn("white", "f2", 122);
 let whitePawnSeven = new Pawn("white", "g2", 123);
 let whitePawnEight = new Pawn("white", "h2", 124);
@@ -566,7 +567,8 @@ function Queen(color, location, pieceId) {
 Queen.prototype = Object.create(Piece.prototype);
 Queen.prototype.constructor = Queen;
 
-let blackQueenOne = new Queen("black", "d8", 104);
+// let blackQueenOne = new Queen("black", "d8", 104);
+let blackQueenOne = new Queen("black", "e6", 104);
 
 let whiteQueenOne = new Queen("white", "d1", 128);
 
@@ -598,8 +600,9 @@ function GameState() {
   this.kingIsChecked = false;
 
   this.firstPartTurn = function() {
-    let playablePieces;
+    let playablePieces = [];
     let currentKing;
+    console.log("piecesArray line 603", piecesArray)
     // based off of isKingInCheck(), should not add querySelector to every piece
     if (gameState.isKingInCheck(piecesArray)) {
       // there are checking pieces
@@ -608,13 +611,15 @@ function GameState() {
       // 1: move king
       if (gameState.canKingMove()) {
         currentKing = gameState.currentKing(piecesArray);
-        playablePieces.push(currentKing);
+        // document.querySelector(`#${currentKing.id}`);
+        playablePieces.push(document.getElementById(`${currentKing.id}`));
       }
       // ^^^^^ returns true or false
       // 2: move piece between king and checking piece [not if two pieces are checking and doesn't work for knights]
         // find which piece(s) is/are checking currentKing
         // gameState.checkingPieces() returns array of checking pieces
         let checkingPieces = gameState.checkingPieces(currentKing);
+        console.log(checkingPieces);
         if (checkingPieces.length > 1) {
           // skip over 2:
         } else {
@@ -628,7 +633,10 @@ function GameState() {
               // push any piece that could block the check into the playablePieces array
             // someMethod should return any playable piece that would block the single checking piece
             let tempPlayablePieces = gameState.findPossibleBlockingPieces(checkingPieces[0], currentKing);
-            tempPlayablePieces.forEach(piece => playablePieces.push(piece));
+            console.log("tempPlayablePieces:", tempPlayablePieces);
+            tempPlayablePieces.forEach(piece => {
+              playablePieces.push(document.getElementById(`${piece.id}`));
+            });
           }
         }
       // 3: capture checking piece [doesn't work if two pieces are checking]
@@ -639,6 +647,7 @@ function GameState() {
         playablePieces = document.querySelectorAll('.blackPiece');
       }
     }
+    console.log('playablePieces:', playablePieces);
     playablePieces.forEach(piece => {
       piece.addEventListener('click', selectPiece);
     })
@@ -891,7 +900,8 @@ function GameState() {
         }
       });
     }
-    while (!isChecked) {
+    let continueIteration = true;
+    while (continueIteration) {
       opponentObjs.forEach(opponentPiece => {
         // check if potential moves put king in check
         if (opponentPiece.pieceType === "pawn") {
@@ -899,34 +909,38 @@ function GameState() {
             if (attack(opponentPiece.location) === currentKing.location) {
               // if true, then king is in check from this pawn
               isChecked = true;
+              continueIteration = false;
             }
           })
         } else if (opponentPiece.pieceType === "queen" || "bishop" || "rook" || "knight") {
           // don't include king in the list above because king's can't get within checking distance
           opponentPiece.moves.forEach((moveArray, index) => {
-            let continueIteration = true;
+            let continueNestedIteration = true;
             moveArray.forEach((move, index) => {
-              if (continueIteration) {
+              if (continueNestedIteration) {
                 if (!gameboard.isPositionLegal(parseInt(move(opponentPiece.location), 18))) {
-                  continueIteration = false;
-                  return
+                  continueNestedIteration = false;
                 }
                 if (move(opponentPiece.location) === currentKing.location) {
                   // if true, then king is in check from this piece
                   isChecked = true;
+                  continueIteration = false;
                 }
-                for (piece in piecesArray) {
-                  if (piece.location === move(opponentPiece.location)) {
+                let tempLoc = move(opponentPiece.location);
+                piecesArray.forEach(piece => {
+                  // console.log(piece.id);
+                  // console.log("^^^^^^^piece.id line 919");
+                  if (piece.location === tempLoc) {
                     // there is a piece at that location
-                    continueIteration = false;
-                    return
+                    continueNestedIteration = false;
                   }
-                }
+                })
               }
             })
           })
         }
       })
+      continueIteration = false;
     }
     return isChecked
   }
@@ -1105,11 +1119,6 @@ function GameState() {
       while (tempLoc !== largerLocation) {
         blockingSquareLocations.push(tempLoc);
         tempLoc += factor;
-        console.log("hope I don't get looping")
-        console.log(smallerLocation);
-        console.log(largerLocation);
-        console.log(tempLoc);
-        console.log(blockingSquareLocations);
       }
     }
     let [smallerLocation, largerLocation] = locationBySizeFunc();
@@ -1129,6 +1138,9 @@ function GameState() {
     }
     // iterate over all of current player's pieces to see if any piece can move to any of the locations between checkingPiece and currentKing
     console.log(blockingSquareLocations); // in base 10
+    blockingSquareLocations.forEach((location, index) => {
+      blockingSquareLocations[index] = location.toString(18);
+    })
     // make sure that piece moving wouldn't put king in check
     let currentPlayerPieces;
     if (gameState.isWhiteTurn) {
@@ -1136,72 +1148,58 @@ function GameState() {
     } else {
       currentPlayerPieces = piecesArray.filter(piece => piece.color === "black" && piece.pieceType !== "king")
     }
-    // first: see if that piece and the single checking piece were not on the board if the king would be in check
     currentPlayerPieces.forEach(currentPlayerPiece => {
-      let tempPiecesArray = piecesArray;
-      // need to remove currentPlayerPiece & checkingPiece from tempPiecesArray
-      tempPiecesArray = tempPiecesArray.filter(piece => {
-        return piece.id !== currentPlayerPiece.id
-      })
-      tempPiecesArray = tempPiecesArray.filter(piece => {
-        return piece.id !== checkingPiece.id
-      })
-      // update location of potentially moving piece
-      // tempPiecesArray.forEach(piece => {
-      //   if (piece.location === currentPlayerPiece.location) {
-      //     piece.location = move(currentPlayerPiece.location)
-      //   }
-      // })
-      if (gameState.isKingInCheck(tempPiecesArray)) {
-        // king would be in check if currentPlayerPiece moves
-      } else {
-        // passes first point
-        // if first point passes, then second: see if that piece can move to one of the blockingSquareLocations in that array
-        // if second is true, push that piece into the out array
-        if (currentPlayerPiece.pieceType === "pawn") {
-          // pawn moves (attacks won't count because blocking square locations must be empty)
-          let continueIteration = true;
-          while (continueIteration) {
-            currentPlayerPiece.moves.forEach((move, index) => {
-              if (document.getElementById(`${move(selectedObj.location)}`).childNodes.length > 0) {
-                continueIteration = false;
-              } else {
-                blockingSquareLocations.forEach(location => {
-                  if (move(currentPlayerPiece.location) === location) {
-                    // piece could move to possible blocking square location
-                    out.push(currentPlayerPiece);
-                  }
-                })
-              }
-            })
-          }
-        } else {
-          // iterate over array and nested array of moves to see if any possible moves would land on any of the possible blockingSquareLocations
-          let continueIteration = true;
-          while (continueIteration) {
-            currentPlayerPiece.moves.forEach((moveArray, index) => {
-              let nestedContinueIteration = true;
-              moveArray.forEach((move, index) => {
-                while (nestedContinueIteration) {
-                  if (!gameboard.isPositionLegal(parseInt(move(currentPlayerPiece.location), 18))) {
-                    nestedContinueIteration = false;
-                  }
-                  if (document.getElementById(`${move(currentPlayerPiece.location)}`).childNodes.length > 0) {
-                    // there is a piece on that square
-                    nestedContinueIteration = false;
-                  } else {
-                    blockingSquareLocations.forEach(location => {
-                      if (move(currentPlayerPiece.location) === location) {
-                        // piece could move to possible blocking square location
-                        out.push(currentPlayerPiece);
-                        continueIteration = false;
-                      }
-                    })
-                  }
+      if (currentPlayerPiece.pieceType === "pawn") {
+        // pawn moves (attacks won't count because blocking square locations must be empty)
+        let continueIteration = true;
+        while (continueIteration) {
+          currentPlayerPiece.moves.forEach((move, index) => {
+            if (document.getElementById(`${move(currentPlayerPiece.location)}`).childNodes.length > 0) {
+              continueIteration = false;
+            } else {
+              blockingSquareLocations.forEach(location => {
+                if (move(currentPlayerPiece.location) === location) {
+                  // piece could move to possible blocking square location
+                  out.push(currentPlayerPiece);
+                  continueIteration = false;
                 }
               })
+            }
+          })
+          continueIteration = false;
+        }
+      } else {
+        // iterate over array and nested array of moves to see if any possible moves would land on any of the possible blockingSquareLocations
+        let continueIteration = true;
+        while (continueIteration) {
+          currentPlayerPiece.moves.forEach((moveArray, index) => {
+            let nestedContinueIteration = true;
+            moveArray.forEach((move, index) => {
+              if (nestedContinueIteration) {
+                if (!gameboard.isPositionLegal(parseInt(move(currentPlayerPiece.location), 18))) {
+                  nestedContinueIteration = false;
+                  return
+                }
+                if (document.getElementById(`${move(currentPlayerPiece.location)}`).childNodes.length > 0) {
+                  // there is a piece on that square
+                  nestedContinueIteration = false;
+                } else {
+                  blockingSquareLocations.forEach(location => {
+                    if (currentPlayerPiece.pieceType === "queen") {
+                      console.log(move(currentPlayerPiece.location));
+                      console.log(location);
+                    }
+                    if (move(currentPlayerPiece.location) === location) {
+                      // piece could move to possible blocking square location
+                      out.push(currentPlayerPiece);
+                      continueIteration = false;
+                    }
+                  })
+                }
+              }
             })
-          }
+          })
+          continueIteration = false;
         }
       }
     })
@@ -1216,7 +1214,6 @@ let gameState = new GameState();
 
 
 gameState.firstPartTurn();
-
 //TODO prevent adding eventListener for a move/attack that would put one's own king in check
 
 
