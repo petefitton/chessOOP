@@ -324,7 +324,8 @@ let blackKnightOne = new Knight("black", "b8", 102);
 let blackKnightTwo = new Knight("black", "g8", 107);
 
 let whiteKnightOne = new Knight("white", "b1", 126);
-let whiteKnightTwo = new Knight("white", "g1", 131);
+// let whiteKnightTwo = new Knight("white", "g1", 131);
+let whiteKnightTwo = new Knight("white", "h3", 131);
 
 
 
@@ -398,7 +399,8 @@ let blackBishopOne = new Bishop("black", "c8", 103);
 let blackBishopTwo = new Bishop("black", "f8", 106);
 
 let whiteBishopOne = new Bishop("white", "c1", 127);
-let whiteBishopTwo = new Bishop("white", "f1", 130);
+// let whiteBishopTwo = new Bishop("white", "f1", 130);
+let whiteBishopTwo = new Bishop("white", "e2", 130);
 
 
 
@@ -462,7 +464,8 @@ King.prototype.constructor = King;
 
 let blackKingOne = new King("black", "e8", 105);
 
-let whiteKingOne = new King("white", "e1", 129);
+// let whiteKingOne = new King("white", "e1", 129);
+let whiteKingOne = new King("white", "f1", 129);
 
 
 
@@ -570,7 +573,8 @@ Queen.prototype.constructor = Queen;
 // let blackQueenOne = new Queen("black", "d8", 104);
 let blackQueenOne = new Queen("black", "e6", 104);
 
-let whiteQueenOne = new Queen("white", "d1", 128);
+// let whiteQueenOne = new Queen("white", "d1", 128);
+let whiteQueenOne = new Queen("white", "a4", 128);
 
 
 console.log(blackPawnFour);
@@ -609,6 +613,7 @@ function GameState() {
       // which pieces should have selectPiece eventListener added to them?
       // three possible ways to get king out of check
       // 1: move king
+// issue is here in canKingMove()
       if (gameState.canKingMove()) {
         currentKing = gameState.currentKing(piecesArray);
         // document.querySelector(`#${currentKing.id}`);
@@ -618,27 +623,27 @@ function GameState() {
       // 2: move piece between king and checking piece [not if two pieces are checking and doesn't work for knights]
         // find which piece(s) is/are checking currentKing
         // gameState.checkingPieces() returns array of checking pieces
-        let checkingPieces = gameState.checkingPieces(currentKing);
-        console.log(checkingPieces);
-        if (checkingPieces.length > 1) {
-          // skip over 2:
+      let checkingPieces = gameState.checkingPieces(currentKing);
+      console.log(checkingPieces);
+      if (checkingPieces.length > 1) {
+        // skip over 2:
+      } else {
+        if (checkingPieces[0].pieceType === "knight") {
+          // skip
         } else {
-          if (checkingPieces[0].pieceType === "knight") {
-            // skip
-          } else {
-            // don't skip 2:
-            // check to see what pieces could potentially block any of the checking pieces (not include capturing)
-            // else moving a blocking piece may be possible
-              // check and see if which pieces can move between king and checking piece(singular)
-              // push any piece that could block the check into the playablePieces array
-            // someMethod should return any playable piece that would block the single checking piece
-            let tempPlayablePieces = gameState.findPossibleBlockingPieces(checkingPieces[0], currentKing);
-            console.log("tempPlayablePieces:", tempPlayablePieces);
-            tempPlayablePieces.forEach(piece => {
-              playablePieces.push(document.getElementById(`${piece.id}`));
-            });
-          }
+          // don't skip 2:
+          // check to see what pieces could potentially block any of the checking pieces (not include capturing)
+          // else moving a blocking piece may be possible
+            // check and see if which pieces can move between king and checking piece(singular)
+            // push any piece that could block the check into the playablePieces array
+          // someMethod should return any playable piece that would block the single checking piece
+          let tempPlayablePieces = gameState.findPossibleBlockingPieces(checkingPieces[0], currentKing);
+          console.log("tempPlayablePieces:", tempPlayablePieces);
+          tempPlayablePieces.forEach(piece => {
+            playablePieces.push(document.getElementById(`${piece.id}`));
+          });
         }
+      }
       // 3: capture checking piece [doesn't work if two pieces are checking]
       if (checkingPieces.length > 1) {
         // do not run method if there are two checking pieces
@@ -664,9 +669,17 @@ function GameState() {
       }
     }
     console.log('playablePieces:', playablePieces);
-    playablePieces.forEach(piece => {
-      piece.addEventListener('click', selectPiece);
-    })
+    if (playablePieces.length === 0) {
+      if (gameState.isKingInCheck()) {
+        console.log("CHECKMATE");
+      } else {
+        console.log("STALEMATE");
+      }
+    } else {
+      playablePieces.forEach(piece => {
+        piece.addEventListener('click', selectPiece);
+      })
+    }
   }
 
   function selectPiece(e) {
@@ -755,6 +768,13 @@ function GameState() {
             if (document.getElementById(`${move(selectedObj.location)}`).childNodes.length > 0) {
               // there is a piece on that square
               if (gameState.isWhiteTurn) {
+                if (selectedObj.pieceType === "king") {
+                  selectedObj.moves.forEach(moveArray => {
+                    moveArray.forEach(move => {
+                      console.log(move(whiteKingOne.location));
+                    })
+                  })
+                }
                 console.log(document.getElementById(`${move(selectedObj.location)}`).classList)
                 console.log("^^^^^^ class list from potential attack div")
                 if (document.getElementById(`${move(selectedObj.location)}`).childNodes[0].classList[0] === "blackPiece") {
@@ -819,37 +839,63 @@ function GameState() {
   }
 
   function movePiece(e) {
-    let playablePieces
-    if (gameState.isWhiteTurn) { 
-      playablePieces = document.querySelectorAll('.whitePiece');
-    } else {
-      playablePieces = document.querySelectorAll('.blackPiece');
-    }
-    // console.log(playablePieces)
-    playablePieces.forEach(piece => {
-      piece.removeEventListener('click', selectPiece);
-    })
-
-    document.querySelectorAll('.square').forEach(square => {
-      square.removeEventListener('click', movePiece);
-      square.removeEventListener('click', capturePiece);
-    })
+    // create tempPiecesArray to see if moving this piece to that location would result in one's king still being in check or not
     let pieceObject = findObjFromGameStateSelectedPieceImg();
-    pieceObject.location = e.target.id;
-    pieceObject.render(gameState.selectedPieceImg, pieceObject.location);
-    if (pieceObject.pieceType === "pawn") {
-      if (pieceObject.hasMoved === false) {
-        pieceObject.hasMoved = true;
-        pieceObject.moves.pop();
+    let tempPiecesArray = piecesArray;
+    // update location of moving piece
+    tempPiecesArray.forEach(piece => {
+      if (pieceObject.id == piece.id) {
+        piece.location = e.target.id;
       }
-    }
-    if (pieceObject.pieceType === "king" || "rook") {
-      if (pieceObject.hasMoved === false) {
-        pieceObject.hasMoved = true;
+    })
+    if (gameState.isKingInCheck(tempPiecesArray)) {
+      // do not allow move
+    } else {
+      let playablePieces
+      if (gameState.isWhiteTurn) { 
+        playablePieces = document.querySelectorAll('.whitePiece');
+      } else {
+        playablePieces = document.querySelectorAll('.blackPiece');
       }
+      // console.log(playablePieces)
+      playablePieces.forEach(piece => {
+        piece.removeEventListener('click', selectPiece);
+      })
+
+      document.querySelectorAll('.square').forEach(square => {
+        square.removeEventListener('click', movePiece);
+        square.removeEventListener('click', capturePiece);
+      })
+      pieceObject.location = e.target.id;
+      piecesArray.forEach((piece, index) => {
+        // piece.id is in base 10
+        // e.target.id is in base 18
+        if (piece.id == pieceObject.id) {
+          console.log("e.target.id:", e.target.id);
+          console.log("pieceObject.location before getting changed:", piece.location);
+          piece.location = e.target.id;
+          console.log("pieceObject.location after getting changed:", piece.location);
+          piecesArray[index] = piece;
+          console.log(piecesArray[index]);
+          console.log(piecesArray[index].location);
+        }
+      })
+      console.log(piecesArray, "line 875☺️☺️☺️");
+      pieceObject.render(gameState.selectedPieceImg, pieceObject.location);
+      if (pieceObject.pieceType === "pawn") {
+        if (pieceObject.hasMoved === false) {
+          pieceObject.hasMoved = true;
+          pieceObject.moves.pop();
+        }
+      }
+      if (pieceObject.pieceType === "king" || "rook") {
+        if (pieceObject.hasMoved === false) {
+          pieceObject.hasMoved = true;
+        }
+      }
+      gameState.isWhiteTurn = !gameState.isWhiteTurn;
+      return gameState.firstPartTurn();
     }
-    gameState.isWhiteTurn = !gameState.isWhiteTurn;
-    return gameState.firstPartTurn();
   }
 
   function capturePiece(e) {
@@ -968,6 +1014,7 @@ function GameState() {
     return isChecked
   }
 
+  // issue I am having with king updating location from g1 to f1 automatically when checkmated by queen is located in this method
   this.canKingMove = function() {
     // returns boolean of whether king can move out of check
     let out = false;
@@ -1095,6 +1142,10 @@ function GameState() {
         })
       } else if (opposingPlayerPiece.pieceType === "queen" || "bishop" || "rook" || "knight") {
         // iterate over current player's pieces to see if a move would make king NOT be in check, if that's true push that piece into the out array
+        if (opposingPlayerPiece.pieceType === "queen") {
+          console.log(opposingPlayerPiece.location);
+          console.log(currentKing.location);
+        }
         opposingPlayerPiece.moves.forEach((moveArray, index) => {
           let continueIteration = true;
           moveArray.forEach((move, index) => {
@@ -1103,7 +1154,7 @@ function GameState() {
                 continueIteration = false;
                 return
               }
-              if (move(opposingPlayerPiece.location) === currentKing.location) {
+              if (move(opposingPlayerPiece.location) == currentKing.location) {
                 // checking piece
                 out.push(opposingPlayerPiece);
               }
@@ -1332,3 +1383,10 @@ gameState.firstPartTurn();
   // if none of current player's pieces can move to get king out of check (or without creating a new check on one's own king)
     // then checkmate has occurred
 // requires iterating over both player pieces arrays
+
+
+// logic for handling insufficient material
+// king vs king
+// king + either bishop or knight vs king
+// 50-move rule (if no capture has been made or pawn has been moved in last 50 moves)
+// threefold-repetition rule
