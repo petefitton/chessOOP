@@ -161,8 +161,8 @@ function Pawn(color, location, pieceId) {
   this.image.src = this.img_src;
   this.image.id = pieceId;
   this.render = function(imgNode, location) {
-    console.log(location)
-    console.log(document.getElementById(location))
+    // console.log(location)
+    // console.log(document.getElementById(location))
     document.getElementById(location).appendChild(imgNode);
   }
   this.render(this.image, this.location);
@@ -573,7 +573,7 @@ let blackQueenOne = new Queen("black", "e6", 104);
 let whiteQueenOne = new Queen("white", "d1", 128);
 
 
-
+console.log(blackPawnFour);
 piecesArray.push(blackRookOne, blackKnightOne, blackBishopOne, blackQueenOne, blackKingOne, blackBishopTwo, blackKnightTwo, blackRookTwo, blackPawnOne, blackPawnTwo, blackPawnThree, blackPawnFour, blackPawnFive, blackPawnSix, blackPawnSeven, blackPawnEight)
 piecesArray.push(whitePawnOne, whitePawnTwo, whitePawnThree, whitePawnFour, whitePawnFive, whitePawnSix, whitePawnSeven, whitePawnEight, whiteRookOne, whiteKnightOne, whiteBishopOne, whiteQueenOne, whiteKingOne, whiteBishopTwo, whiteKnightTwo, whiteRookTwo)
 console.log(piecesArray)
@@ -640,6 +640,22 @@ function GameState() {
           }
         }
       // 3: capture checking piece [doesn't work if two pieces are checking]
+      if (checkingPieces.length > 1) {
+        // do not run method if there are two checking pieces
+      } else {
+        let tempPlayablePieces = gameState.findCheckingPieceCapturePieces(checkingPieces[0]);
+        // returns an array of pieces that can capture a checking piece
+        console.log("tempPlayablePieces:", tempPlayablePieces);
+        tempPlayablePieces.forEach(piece => {
+          // do not add a piece that has already been added to playablePieces array
+          let pieceImg = document.getElementById(`${piece.id}`);
+          if (playablePieces.includes(pieceImg)) {
+            // do not add it again
+          } else {
+            playablePieces.push(pieceImg);
+          }
+        });
+      }
     } else {
       if (gameState.isWhiteTurn) {
         playablePieces = document.querySelectorAll('.whitePiece');
@@ -790,11 +806,15 @@ function GameState() {
   
   function findObjFromGameStateSelectedPieceImg() {
     return function() {
+      console.log(gameState.selectedPieceImg.id);
+      // console.log(piecesArray[28]);
       for (i=0; i<piecesArray.length; i++) {
         if (piecesArray[i].id == gameState.selectedPieceImg.id) {
+          console.log("😎😎😎😎😎😎😎");
           return piecesArray[i];
         }
       }
+      console.log("TESTEROO");
     }()
   }
 
@@ -833,6 +853,7 @@ function GameState() {
   }
 
   function capturePiece(e) {
+    console.log("capturing piece");
     // should move to that location, should remove that piece from board, should progress turn
     // should check for check and checkmate
     let playablePieces
@@ -852,10 +873,12 @@ function GameState() {
     })
     let capturedImg = document.getElementById(e.target.id);
     let capturedObject = findObjFromImg(capturedImg);
-    capturedImg.remove();
-    capturedPieces.push(capturedObject)
+    let capturingLocation = capturedObject.location
     let pieceObject = findObjFromGameStateSelectedPieceImg();
-    pieceObject.location = capturedObject.location;
+    capturedImg.remove();
+    capturedPieces.push(capturedObject);
+    piecesArray = piecesArray.filter(piece => piece.id !== capturedObject.id);
+    pieceObject.location = capturingLocation;
     pieceObject.render(gameState.selectedPieceImg, pieceObject.location);
     if (pieceObject.pieceType === "pawn") {
       if (pieceObject.hasMoved === false) {
@@ -948,14 +971,18 @@ function GameState() {
   this.canKingMove = function() {
     // returns boolean of whether king can move out of check
     let out = false;
+    console.log(piecesArray);
     let currentKing = gameState.currentKing(piecesArray);
     if (gameState.isWhiteTurn) {
       opponentPiecesImages = document.querySelectorAll('.blackPiece');
     } else {
       opponentPiecesImages = document.querySelectorAll('.whitePiece');
     }
+    console.log(piecesArray);
     // iterate over king's moves to see if king would be in check in that position
-    while (!out) {
+    let continueChecking = true;
+    while (continueChecking) {
+      console.log(piecesArray);
       currentKing.moves.forEach((moveArray, index) => {
         let continueIteration = true;
         moveArray.forEach((move, index) => {
@@ -980,11 +1007,12 @@ function GameState() {
                   }
                 })
                 // need to remove captured piece from tempPiecesArray
-                tempPiecesArray.splice(index, 1)
+                tempPiecesArray.filter(pieceToFilter => pieceToFilter.id === piece.id)
                 if (gameState.isKingInCheck(tempPiecesArray)) {
                   // king would move into check, not a valid move
                 } else {
                   out = true;
+                  continueChecking = false;
                 }
               }
               continueIteration = false;
@@ -1004,12 +1032,15 @@ function GameState() {
                 // king would move into check, not a valid move
               } else {
                 out = true;
+                continueChecking = false;
               }
             }
           })
         })
       })
+      continueChecking = false;
     }
+    console.log(piecesArray);
     return out
   }
 
@@ -1205,6 +1236,60 @@ function GameState() {
     })
     console.log(out);
     console.log("^^^^^^^^ out😇");
+    return out
+  }
+
+  this.findCheckingPieceCapturePieces = function(checkingPiece) {
+    // returns an array of pieces that can capture a single checking piece
+    let out = [];
+    let currentPlayerPieces;
+    if (gameState.isWhiteTurn) {
+      currentPlayerPieces = piecesArray.filter(piece => piece.color === "white" && piece.pieceType !== "king")
+    } else {
+      currentPlayerPieces = piecesArray.filter(piece => piece.color === "black" && piece.pieceType !== "king")
+    }
+    currentPlayerPieces.forEach(currentPlayerPiece => {
+      if (currentPlayerPiece.pieceType === "pawn") {
+        // pawn moves (attacks won't count because blocking square locations must be empty)
+        let continueIteration = true;
+        while (continueIteration) {
+          currentPlayerPiece.attack.forEach((attack, index) => {
+            if (attack(currentPlayerPiece.location) === checkingPiece.location) {
+              out.push(currentPlayerPiece);
+              continueIteration = false;
+            }
+          })
+          continueIteration = false;
+        }
+      } else {
+        // iterate over array and nested array of moves to see if any possible moves would land on any of the possible blockingSquareLocations
+        let continueIteration = true;
+        while (continueIteration) {
+          currentPlayerPiece.moves.forEach((moveArray, index) => {
+            let nestedContinueIteration = true;
+            moveArray.forEach((move, index) => {
+              if (nestedContinueIteration) {
+                if (!gameboard.isPositionLegal(parseInt(move(currentPlayerPiece.location), 18))) {
+                  nestedContinueIteration = false;
+                  return
+                }
+                if (move(currentPlayerPiece.location) === checkingPiece.location) {
+                  out.push(currentPlayerPiece);
+                  continueIteration = false;
+                }
+                if (document.getElementById(`${move(currentPlayerPiece.location)}`).childNodes.length > 0) {
+                  // there is a piece on that square that is not the checking piece
+                  nestedContinueIteration = false;
+                }
+              }
+            })
+          })
+          continueIteration = false;
+        }
+      }
+    })
+    console.log(out);
+    console.log("^^^^^^^^ out🧐");
     return out
   }
 }
