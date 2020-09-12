@@ -605,7 +605,7 @@ function GameState() {
 
   this.firstPartTurn = function() {
     let playablePieces = [];
-    let currentKing;
+    let currentKing = gameState.currentKing(piecesArray);
     console.log("piecesArray line 603", piecesArray)
     // based off of isKingInCheck(), should not add querySelector to every piece
     if (gameState.isKingInCheck(piecesArray)) {
@@ -615,7 +615,6 @@ function GameState() {
       // 1: move king
 // issue is here in canKingMove()
       if (gameState.canKingMove()) {
-        currentKing = gameState.currentKing(piecesArray);
         // document.querySelector(`#${currentKing.id}`);
         playablePieces.push(document.getElementById(`${currentKing.id}`));
       }
@@ -670,7 +669,7 @@ function GameState() {
     }
     console.log('playablePieces:', playablePieces);
     if (playablePieces.length === 0) {
-      if (gameState.isKingInCheck()) {
+      if (gameState.isKingInCheck(piecesArray)) {
         console.log("CHECKMATE");
       } else {
         console.log("STALEMATE");
@@ -841,7 +840,9 @@ function GameState() {
   function movePiece(e) {
     // create tempPiecesArray to see if moving this piece to that location would result in one's king still being in check or not
     let pieceObject = findObjFromGameStateSelectedPieceImg();
-    let tempPiecesArray = piecesArray;
+    let tempPiecesArray = piecesArray.map(a => Object.assign({}, a));
+    console.log(tempPiecesArray);
+    console.log("tempPiecesArray^^^^^^^^^^^^^^^ line 846");
     // update location of moving piece
     tempPiecesArray.forEach(piece => {
       if (pieceObject.id == piece.id) {
@@ -894,6 +895,7 @@ function GameState() {
         }
       }
       gameState.isWhiteTurn = !gameState.isWhiteTurn;
+      console.log("player turn changes here");
       return gameState.firstPartTurn();
     }
   }
@@ -953,6 +955,7 @@ function GameState() {
 
   this.isKingInCheck = function(piecesArray) {
     // should return true or false if king is in check or not
+    console.log(piecesArray);
     let opponentObjs;
     let currentKing = gameState.currentKing(piecesArray);
     let isChecked = false;
@@ -1011,6 +1014,12 @@ function GameState() {
       })
       continueIteration = false;
     }
+    console.log(isChecked);
+    console.log("isChecked^^^^^^^ in .isKingInCheck");
+    console.log(currentKing);
+    console.log("currentKing ^^^^^^ in .isKingInCheck");
+    console.log(piecesArray);
+    console.log("piecesArray ^^^^^^ in .isKingInCheck");
     return isChecked
   }
 
@@ -1019,7 +1028,9 @@ function GameState() {
     // returns boolean of whether king can move out of check
     let out = false;
     console.log(piecesArray);
+    // debugger;
     let currentKing = gameState.currentKing(piecesArray);
+    // debugger;
     if (gameState.isWhiteTurn) {
       opponentPiecesImages = document.querySelectorAll('.blackPiece');
     } else {
@@ -1032,61 +1043,117 @@ function GameState() {
       console.log(piecesArray);
       currentKing.moves.forEach((moveArray, index) => {
         let continueIteration = true;
-        moveArray.forEach((move, index) => {
-          if (!gameboard.isPositionLegal(parseInt(move(currentKing.location), 18))) {
-            // illegal position
-          }
-          piecesArray.forEach((piece, index) => {
-            if (piece.location === move(currentKing.location)) {
-              // there is a piece at that location
-              if (piece.color === "white" && currentKing.color === "white") {
-                // current player's piece
-              } else if (piece.color === "black" && currentKing.color === "black") {
-                // same
+        while (continueIteration) {
+          moveArray.forEach((move, index) => {
+            if (!gameboard.isPositionLegal(parseInt(move(currentKing.location), 18))) {
+              // illegal position
+              continueIteration = false;
+            } else {
+              // I am trying to iterate over each piece's location to see if there is a piece there, rather than how it's written here; BAD LOGIC
+              // GOALS:
+              // find out if there is a piece at the location the king wants to move to
+              // find out if that piece could be captured by the king or not based off of currentKing.color and that piece's color
+              // see if the king would be in check if moving or capturing a piece at that location
+              let potentialKingMove = move(currentKing.location);
+              let pieceAtThatLocation;
+              for (let i=0; i<piecesArray.length; i++) {
+                if (piecesArray[i].location === potentialKingMove) {
+                  // there is a piece there, update pieceAtThatLocation
+                  pieceAtThatLocation = piecesArray[i];
+                  i = piecesArray.length;
+                }
+              }
+              if (pieceAtThatLocation) {
+                if (pieceAtThatLocation.color === "white" && currentKing.color === "white") {
+                  // current player's piece
+                } else if (pieceAtThatLocation.color === "black" && currentKing.color === "black") {
+                  // same
+                } else {
+                  // possible move/capture
+                  // use gameState.isKingInCheck(tempPiecesArray) to determine if King would move into check or not
+                  let tempPiecesArray = piecesArray.map(a => Object.assign({}, a));
+                  // need to change location of king in tempPiecesArray
+                  tempPiecesArray.forEach(piece => {
+                    if (piece.id === currentKing.id) {
+                      // likely candidate for issue is #1 here and #2 below
+                      // console.log(tempPiecesArray);
+                      // console.log(piecesArray);
+                      // console.log(piece);
+                      // console.log(currentKing);
+                      // debugger;
+                      piece.location = move(currentKing.location)
+                      // console.log(tempPiecesArray);
+                      // console.log(piecesArray);
+                      // console.log(piece);
+                      // console.log(currentKing);
+                      // debugger;
+                    }
+                  })
+                  // need to remove captured piece from tempPiecesArray
+                  tempPiecesArray.filter(pieceToFilter => pieceToFilter.id === pieceAtThatLocation.id)
+                  // debugger;
+                  if (gameState.isKingInCheck(tempPiecesArray)) {
+                    // king would move into check, not a valid move
+                  } else {
+                    console.log("number 11111111😅");
+                    console.log(moveArray);
+                    console.log(move);
+                    console.log(piece);
+                    console.log(tempPiecesArray);
+                    console.log(gameState.isKingInCheck(tempPiecesArray));
+                    out = true;
+                    continueChecking = false;
+                  }
+                }
+                continueIteration = false;
+                return
               } else {
-                // possible move/capture
-                // use gameState.isKingInCheck(tempPiecesArray) to determine if King would move into check or not
-                let tempPiecesArray = piecesArray;
+                // nothing there
+                // possible move (but king must not move into check)
+                // if it's legit: out = true;
+                let tempPiecesArray = piecesArray.map(a => Object.assign({}, a));
                 // need to change location of king in tempPiecesArray
                 tempPiecesArray.forEach(piece => {
-                  if (piece.pieceType === "king" && piece.color === currentKing.color) {
+                  if (piece.id === currentKing.id) {
+                    // console.log(tempPiecesArray);
+                    // console.log(piecesArray);
+                    // console.log(piece);
+                    // console.log(currentKing);
+                    // debugger;
+                    // likely candidate for issue is #2 here and #1 above
+                    // piece.location is changing both tempPiecesArray and piecesArray
                     piece.location = move(currentKing.location)
+                    // console.log(tempPiecesArray);
+                    // console.log(piecesArray);
+                    // console.log(piece);
+                    // console.log(currentKing);
+                    // debugger;
                   }
                 })
-                // need to remove captured piece from tempPiecesArray
-                tempPiecesArray.filter(pieceToFilter => pieceToFilter.id === piece.id)
+                // debugger;
                 if (gameState.isKingInCheck(tempPiecesArray)) {
                   // king would move into check, not a valid move
                 } else {
+                  console.log("number 222222😅");
+                  console.log(moveArray);
+                  console.log(move);
+                  console.log(piece);
+                  console.log(tempPiecesArray);
+                  console.log(gameState.isKingInCheck(tempPiecesArray));
                   out = true;
                   continueChecking = false;
                 }
               }
-              continueIteration = false;
-              return
-            } else {
-              // nothing there
-              // possible move (but king must not move into check)
-              // if it's legit: out = true;
-              let tempPiecesArray = piecesArray;
-              // need to change location of king in tempPiecesArray
-              tempPiecesArray.forEach(piece => {
-                if (piece.pieceType === "king" && piece.color === currentKing.color) {
-                  piece.location = move(currentKing.location)
-                }
-              })
-              if (gameState.isKingInCheck(tempPiecesArray)) {
-                // king would move into check, not a valid move
-              } else {
-                out = true;
-                continueChecking = false;
-              }
             }
           })
-        })
+          continueIteration = false;
+        }
       })
       continueChecking = false;
     }
+    // debugger;
+    console.log(out);
+    console.log("out^^^^^^^^^^^^^ from .canKingMove");
     console.log(piecesArray);
     return out
   }
@@ -1114,6 +1181,7 @@ function GameState() {
   }
 
   this.checkingPieces = function(currentKing) {
+    console.log(currentKing);
     // should return an array of checking pieces (either one or two pieces)
     let out = [];
     // iterate over current player's pieces
@@ -1133,6 +1201,7 @@ function GameState() {
       });
     }
     opponentObjs.forEach(opposingPlayerPiece => {
+      console.log(currentKing);
       if (opposingPlayerPiece.pieceType === "pawn") {
         opposingPlayerPiece.attack.forEach((attack, index) => {
           if (attack(opposingPlayerPiece.location) === currentKing.location) {
@@ -1148,8 +1217,10 @@ function GameState() {
         }
         opposingPlayerPiece.moves.forEach((moveArray, index) => {
           let continueIteration = true;
+          console.log(currentKing);
           moveArray.forEach((move, index) => {
             if (continueIteration) {
+              console.log(currentKing);
               if (!gameboard.isPositionLegal(parseInt(move(opposingPlayerPiece.location), 18))) {
                 continueIteration = false;
                 return
