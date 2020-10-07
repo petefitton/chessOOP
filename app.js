@@ -7,7 +7,7 @@
 // en passant
 
 
-
+// consider looking at realpython.com/python-vs-javascript/#prototypes for more information on OOP in JS
 
 
 
@@ -1098,7 +1098,6 @@ function GameState() {
                     console.log("number 11111111😅");
                     console.log(moveArray);
                     console.log(move);
-                    console.log(piece);
                     console.log(tempPiecesArray);
                     console.log(gameState.isKingInCheck(tempPiecesArray));
                     out = true;
@@ -1137,7 +1136,6 @@ function GameState() {
                   console.log("number 222222😅");
                   console.log(moveArray);
                   console.log(move);
-                  console.log(piece);
                   console.log(tempPiecesArray);
                   console.log(gameState.isKingInCheck(tempPiecesArray));
                   out = true;
